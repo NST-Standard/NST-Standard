@@ -1,45 +1,111 @@
 # Non sellable token
 
-## ERC721
+_Non sellable token (NST) are between SBT and NFT, they cannot be freely transfered between wallet. NST implement an exchange function at the contract level. The NST implementation allow others NST to be transferable with itself_
 
-**Mandatory element** for ERC721 retrocompability
+## TODO
 
-**Storage:**
-| Name | Type | Slot | Offset | Bytes |
-|--------------------|---------------------------------|------|--------|-------|
-| **\_name** | string | 0 | 0 | 32 |
-| **\_symbol** | string | 1 | 0 | 32 |
-| \_owners | mapping(uint256 => address) | 2 | 0 | 32 |
-| \_balances | mapping(address => uint256) | 3 | 0 | 32 |
-| \_tokenApprovals | mapping(uint256 => address) | 4 | 0 | 32 |
-| \_operatorApprovals | mapping(address => mapping(address => bool)) | 5 | 0 | 32 |
+- [ ] test signature manipulation (replay attack)
+- [ ] implement nonce mecanism and deadline
+- [ ] implement several exchange and permit method depends on the message
+- [ ] compare gas used with two transfer of an ERC721 through a market place
+
+## Usage
+
+Make sure you have installed [Rust](https://www.rust-lang.org/fr/learn/get-started) & [Foundry](https://book.getfoundry.sh/getting-started/installation)
+
+```
+forge install
+forge update
+```
+
+**Compile contracts:**
+
+Set compiler version in `foundry.toml`
+
+```toml
+solc = "0.8.13"
+```
+
+Compile and log contracts sizes:
+
+```
+forge build --sizes
+```
+
+**Run tests:**
+
+```
+forge test -vvvv
+```
+
+---
+
+## NST primer
+
+3 transfer type:
+
+- Mint (transfer from issuer)
+- Exchange (exchange with another NST)
+- Burn (transfer to issuer, token usage)
+
+Mint & burn are only-owner restricted function, implementation change depends on the token usage / implementation.
+
+**Perform a transfer between two users:**
+
+- Force users to send and receive NST in the same transaction (send to receive | receive to send).
+
+- Exchange is performed in one transaction using a "transfer with data". Inspired from [Certificate-based token transfers (Consenys::UniversalToken)](https://github.com/ConsenSys/UniversalToken/tree/master/contracts/certificate) which is a way to perform multisignature transaction.
+
+**Avoid fake token utilisation to send and receive NST:**
+
+- Each token should maintain a whitelist of NST
+  - Allow the token to be protected from malicious token.
+  - Maintnainer should check the contract code to ensure the whitelisted token has no malicious behaviours.
+
+**Open Questions:**
+
+- Transfer with `amount = 0` should be allowed? (simple transfer equivalent)
+
+---
+
+## About ERC721
+
+**Contract storage:**
+
+```
+forge inspect ERC721 storage --pretty
+```
 
 **Methods:**
+
+```
+forge inspect ERC721 methods
+```
+
+Necessary for retrocompability:
 |Method name|Parameters|Selector|
 |---|---|---|
-|approve|address,uint256|`0x095ea7b3`|
-|balanceOf|address|`0x70a08231`|
-|getApproved|uint256|`0x081812fc`|
-|isApprovedForAll|address,address|`0xe985e9c5`|
-|**name**||`0x06fdde03`|
-|ownerOf|uint256|`0x6352211e`|
-|safeTransferFrom|address,address,uint256|`0x42842e0e`|
-|safeTransferFrom|address,address,uint256,bytes|`0xb88d4fde`|
-|setApprovalForAll|address,bool|`0xa22cb465`|
-|supportsInterface|bytes4|`0x01ffc9a7`|
-|**symbol**||`0x95d89b41`|
-|**tokenURI**|uint256|`0xc87b56dd`|
-|transferFrom|address,address,uint256|`0x23b872dd`|
+|name||`0x06fdde03`|
+|symbol||`0x95d89b41`|
+|tokenURI|`uint256` tokenId|`0xc87b56dd`|
 
-Events:
+**Events:**
 
-| Event Name     | Parameters              | Hash                                                                 |
-| -------------- | ----------------------- | -------------------------------------------------------------------- |
-| Approval       | address,address,uint256 | `0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925` |
-| ApprovalForAll | address,address,bool    | `0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31` |
-| **Transfer**   | address,address,uint256 | `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef` |
+```
+forge inspect ERC721 events
+```
 
-## SBT implementations
+Necessary for retrocompability:
+
+| Event Name   | Parameters                                                  |
+| ------------ | ----------------------------------------------------------- |
+| **Transfer** | `address indexed` \| `address indexed` \| `uint256 indexed` |
+
+---
+
+## About SBT
+
+Here some examples of how SBT implementations prevent transferability.
 
 ### General / custom implementation:
 
@@ -117,7 +183,7 @@ function transferFrom(address from, address to, uint256 tokenId) public payable 
 [SharkzSoulDV1](https://www.codeslaw.app/contracts/ethereum/0x41fd751eaadd666ada7d0780a4022284358bbffd?file=contracts%2Flib-upgradeable%2F4973%2FERC4973SoulContainerUpgradeable.sol&start=57)
 No implementation of `transfer` function (only `IERC721Metadata`)
 
-**Proxy + only IERC721Metadata**, the token is still on OpenSea: https://opensea.io/assets/ethereum/0x12deb1cb5732e40dd55b89abb6d5c31df13a6e38/54
+**Proxy + only IERC721Metadata**, the token is still displayed on OpenSea: https://opensea.io/assets/ethereum/0x12deb1cb5732e40dd55b89abb6d5c31df13a6e38/54
 
 Comment in the code:
 
@@ -156,27 +222,3 @@ function transferFrom(
     revert("RelicToken is soulbound");
 }
 ```
-
----
-
-## NST primer
-
-3 transfer type:
-
-- Mint (transfer from issuer)
-- Exchange (exchange with another NST)
-- Burn (transfer to issuer, token usage)
-
-Mint & burn are only-owner restricted function, implementation change depends on the token usage / implementation.
-
-**Perform a transfer between two users:**
-
-- Force users to send and receive NST in the same transaction (send to receive | receive to send).
-
-- Exchange is performed in one transaction using a "transfer with data". Inspired from [Certificate-based token transfers (Consenys::UniversalToken)](https://github.com/ConsenSys/UniversalToken/tree/master/contracts/certificate) which is a way to perform multisignature transaction.
-
-**Avoid fake token utilisation to send and receive NST:**
-
-- Each token should maintain a whitelist of NST
-  - Allow the token to be protected from malicious token.
-  - Maintnainer should check the contract code to ensure the whitelisted token has no malicious behaviours.
