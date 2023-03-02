@@ -3,47 +3,76 @@
 pragma solidity ^0.8.13;
 
 interface INST {
+    // --- events ---
     event TokenExchangeabilityUpdated(
         address indexed tokenAddr,
         bool indexed exchangeable
     );
 
+    // --- errors ---
     error NotExchangeable(address tokenAddr);
     error InvalidSignatureOwner(address expectedOwner);
 
-    struct TransferInfo {
+    // --- structs ---
+    struct Token {
         address tokenAddr;
         uint256 tokenId;
         uint256 amount;
     }
 
-    struct SignerInfo {
+    struct Tokens {
+        address tokenAddr;
+        uint256[] tokenIds;
+        uint256[] amounts;
+    }
+
+    struct Message {
         address owner;
-        // uint256 nonce
+        uint256 nonce;
         // uint256 deadline
     }
 
-    struct SingleExchangeInfo {
-        TransferInfo given;
-        TransferInfo asked;
-        SignerInfo signerInfo;
+    struct SingleExchange {
+        Token bid;
+        Token ask;
+        Message message;
     }
 
-    struct MultipleExchangeInfo {
-        TransferInfo[] given;
-        TransferInfo[] asked;
-        SignerInfo signerInfo;
+    struct MultipleExchange {
+        Tokens bid;
+        Tokens ask;
+        Message message;
     }
 
-    function PERMIT_TYPEHASH() external view returns (bytes32);
+    // not tested => gas expensive
+    struct ComposedExchange {
+        Tokens[] bid;
+        Tokens[] ask;
+        Message message;
+    }
 
-    function permit(
-        SingleExchangeInfo memory exchangeMessage,
+    // --- getters ---
+    function SINGLE_EXCHANGE_TYPEHASH() external view returns (bytes32);
+
+    function MULTIPLE_EXCHANGE_TYPEHASH() external view returns (bytes32);
+
+    function nonce(address account) external view returns (uint256);
+
+    // --- methods ---
+    function transferFor(
+        SingleExchange memory exchangeData,
+        address to,
         bytes memory signature
-    ) external returns (address);
+    ) external;
+
+    function transferFor(
+        MultipleExchange memory exchangeData,
+        address to,
+        bytes memory signature
+    ) external;
 
     function exchange(
-        SingleExchangeInfo memory exchangeMessage,
+        SingleExchange memory exchangeData,
         bytes memory signature
     ) external;
 }
