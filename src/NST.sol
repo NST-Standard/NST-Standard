@@ -21,19 +21,15 @@ import {INST} from "src/INST.sol";
 contract NST is ERC721, EIP712, INST {
     using ECDSA for bytes32;
 
-    /// @dev Hash of the message/struct to sign and send
-    bytes32 public immutable override SINGLE_EXCHANGE_TYPEHASH;
-    bytes32 public immutable override MULTIPLE_EXCHANGE_TYPEHASH;
-
-    /// @dev Users nonces to protect against replay attack
-    mapping(address => uint256) private _nonces;
-
     /// @dev keep track of allowed token which can be traded with this one
     mapping(address => bool) private _exchangeable;
 
+    /// @dev Hash of the message/struct to sign and send
+    bytes32 public immutable override PERMIT_TYPEHASH;
+
     /// @dev allow only whitelisted token to call a function
-    modifier onlyExchangeable(address tokenAddr) {
-        if (!_exchangeable[tokenAddr]) revert NotExchangeable(tokenAddr);
+    modifier onlyExchangeable() {
+        if (!_exchangeable[msg.sender]) revert NotExchangeable(msg.sender);
         _;
     }
 
@@ -41,18 +37,8 @@ contract NST is ERC721, EIP712, INST {
         ERC721(name_, symbol_)
         EIP712(name_, "1")
     {
-        string memory messageStruct = "Message(address owner,uint256 nonce)";
-        SINGLE_EXCHANGE_TYPEHASH = keccak256(
-            abi.encodePacked(
-                "SingleExchange(Token bid, Token ask, Message message)Token(address tokenAddr,uint256 tokenId,uint256 amount)",
-                messageStruct
-            )
-        );
-        MULTIPLE_EXCHANGE_TYPEHASH = keccak256(
-            abi.encodePacked(
-                "MultipleExchange(Tokens bid, Tokens ask, Message message)Token(address tokenAddr,uint256[] tokenIds,uint256[] amounts)",
-                messageStruct
-            )
+        PERMIT_TYPEHASH = keccak256(
+            "SingleExchangeInfo(TransferInfo given, TransferInfo asked, SignerInfo signerInfo)"
         );
     }
 
@@ -65,7 +51,7 @@ contract NST is ERC721, EIP712, INST {
      * @dev Perform an `ecrecover` on the signature and (if valid) change
      * the token allowance
      *
-     * @param exchangeData struct of the message
+     * @param exchangeMessage struct of the message
      * @param signature signature of the hashed struct following EIP712
      *
      * NOTE Only the owner of the signer message and the given token ID are
@@ -73,66 +59,27 @@ contract NST is ERC721, EIP712, INST {
      *
      * TODO This function should increase a `nonce` of user to avoid replay attack
      */
-
-    function transferFor(
-        SingleExchange memory exchangeData,
-        address to,
+    function permit(
+        SingleExchangeInfo memory exchangeMessage,
         bytes memory signature
-    ) external onlyExchangeable(msg.sender) {
-        // reconstruct the hash of signed message and use nonce
+    ) external onlyExchangeable returns (address) {
+        // reconstruct the hash of signed message
         bytes32 structHash = keccak256(
-            abi.encode(
-                SINGLE_EXCHANGE_TYPEHASH,
-                exchangeData.bid,
-                exchangeData.ask,
-                exchangeData.message.owner,
-                _useNonce(exchangeData.message.owner)
-            )
+            abi.encode(PERMIT_TYPEHASH, exchangeMessage)
         );
+        bytes32 typedDataHash = _hashTypedDataV4(structHash);
 
-        _checkMessageSignature(
-            structHash,
-            exchangeData.message.owner,
-            signature
-        );
+        // perform ecrecover and get signer address
+        address signer = typedDataHash.recover(signature);
+        if (signer != exchangeMessage.signerInfo.owner)
+            revert InvalidSignatureOwner(signer);
 
-        // transfer bid token
-        _transfer(exchangeData.message.owner, to, exchangeData.bid.tokenId);
-    }
+        // increase allowance for this tokenId
+        _approve(msg.sender, exchangeMessage.given.tokenId);
+        // emit Approval(ERC721.ownerOf(tokenId), to, tokenId); ?
 
-    function transferFor(
-        MultipleExchange memory exchangeData,
-        address to,
-        bytes memory signature
-    ) external onlyExchangeable(msg.sender) {
-        // reconstruct the hash of signed message and use nonce
-        bytes32 structHash = keccak256(
-            abi.encode(
-                MULTIPLE_EXCHANGE_TYPEHASH,
-                exchangeData.bid,
-                exchangeData.ask,
-                exchangeData.message.owner,
-                _useNonce(exchangeData.message.owner)
-            )
-        );
-
-        _checkMessageSignature(
-            structHash,
-            exchangeData.message.owner,
-            signature
-        );
-
-        for (uint256 i; i < exchangeData.bid.tokenIds.length; ) {
-            _transfer(
-                exchangeData.message.owner,
-                to,
-                exchangeData.bid.tokenIds[i]
-            );
-
-            unchecked {
-                ++i;
-            }
-        }
+        // This is not necessary as the signer is compared to the message owner
+        return signer;
     }
 
     /*////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,77 +91,28 @@ contract NST is ERC721, EIP712, INST {
      * @dev Only the signature is checked for validity, then the contract
      * rely on ERC721 check on transfers.
      *
-     * @param exchangeData struct of the message
+     * @param exchangeMessage struct of the message
      * @param signature signature of the hashed struct following EIP712
      */
     function exchange(
-        SingleExchange memory exchangeData,
+        SingleExchangeInfo memory exchangeMessage,
         bytes memory signature
-    ) external onlyExchangeable(exchangeData.bid.tokenAddr) {
-        INST(exchangeData.bid.tokenAddr).transferFor(
-            exchangeData,
-            msg.sender,
+    ) external {
+        address to = INST(exchangeMessage.given.tokenAddr).permit(
+            exchangeMessage,
             signature
         );
 
-        _transfer(
+        IERC721(exchangeMessage.given.tokenAddr).transferFrom(
+            to,
             msg.sender,
-            exchangeData.message.owner,
-            exchangeData.ask.tokenId
+            exchangeMessage.given.tokenId
         );
-    }
-
-    function exchange(
-        MultipleExchange memory exchangeData,
-        bytes memory signature
-    ) external onlyExchangeable(exchangeData.bid.tokenAddr) {
-        INST(exchangeData.bid.tokenAddr).transferFor(
-            exchangeData,
-            msg.sender,
-            signature
-        );
-
-        for (uint256 i; i < exchangeData.ask.tokenIds.length; ) {
-            _transfer(
-                msg.sender,
-                exchangeData.message.owner,
-                exchangeData.ask.tokenIds[i]
-            );
-
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    function nonce(address account) external view returns (uint256) {
-        return _nonces[account];
+        _transfer(msg.sender, to, exchangeMessage.asked.tokenId);
     }
 
     /*////////////////////////////////////////////////////////////////////////////////////////////////
-                                      ERC721 - restrict transfer functions
-    ////////////////////////////////////////////////////////////////////////////////////////////////*/
-
-    /// @dev `onlyExchangeable` modifier prevent transferability outside an `exchange` call
-    function transferFrom(
-        address,
-        address,
-        uint256
-    ) public pure override {
-        revert("Not implemented");
-    }
-
-    /// @dev `onlyExchangeable` modifier prevent transferability outside an `exchange` call
-    function safeTransferFrom(
-        address,
-        address,
-        uint256
-    ) public pure override {
-        revert("Not implemented");
-    }
-
-    /*////////////////////////////////////////////////////////////////////////////////////////////////
-                                      NST - internal 
+                                      NST - internal exchangeable 
     ////////////////////////////////////////////////////////////////////////////////////////////////*/
 
     /**
@@ -239,21 +137,25 @@ contract NST is ERC721, EIP712, INST {
         emit TokenExchangeabilityUpdated(tokenAddr, false);
     }
 
-    function _useNonce(address account) internal returns (uint256) {
-        unchecked {
-            return _nonces[account]++;
-        }
+    /*////////////////////////////////////////////////////////////////////////////////////////////////
+                                      ERC721 - restrict transfer functions
+    ////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+    /// @dev `onlyExchangeable` modifier prevent transferability outside an `exchange` call
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override onlyExchangeable {
+        super.transferFrom(from, to, tokenId);
     }
 
-    function _checkMessageSignature(
-        bytes32 structHash,
-        address messageOwner,
-        bytes memory signature
-    ) internal view {
-        bytes32 typedDataHash = _hashTypedDataV4(structHash);
-
-        // perform ecrecover and get signer address
-        address signer = typedDataHash.recover(signature);
-        if (signer != messageOwner) revert InvalidSignatureOwner(signer);
+    /// @dev `onlyExchangeable` modifier prevent transferability outside an `exchange` call
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override onlyExchangeable {
+        super.safeTransferFrom(from, to, tokenId);
     }
 }
