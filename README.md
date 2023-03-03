@@ -2,12 +2,31 @@
 
 _Non sellable token (NST) are between SBT and NFT, they cannot be freely transfered between wallet. NST implement an exchange function at the contract level. The NST implementation allow others NST to be transferable with itself_
 
-## TODO
+## Testnet POC deployment
 
-- [ ] test signature manipulation (replay attack)
-- [ ] implement nonce mecanism and deadline
-- [ ] implement several exchange and permit method depends on the message
-- [ ] compare gas used with two transfer of an ERC721 through a market place
+**Optimism goerli:**
+
+| Token name        | Token address                                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Garden ticket     | [0x1a48b20bd0f0c89f823686c2270c5404887c287c](https://goerli-optimism.etherscan.io/address/0x1a48b20bd0f0c89f823686c2270c5404887c287c) |
+| Support ticket    | [0x1ddd12d738acf870de92fd5387d90f3733d50d94](https://goerli-optimism.etherscan.io/address/0x1ddd12d738acf870de92fd5387d90f3733d50d94) |
+| Cigar credit note | [0xbecced78b7a65a0b2464869553fc0a3c2d2db935](https://goerli-optimism.etherscan.io/address/0xbecced78b7a65a0b2464869553fc0a3c2d2db935) |
+
+**Deploy on testnet:**
+
+Run `anvil` (ganache-like local blockchain):
+
+```
+anvil
+```
+
+Deploy contract on `anvil`:
+
+```
+forge script deploy --rpc-url anvil --broadcast
+```
+
+Add anvil to your metasmask (new network), `anvil` should indicate which port (usually 8545) is listening. Then you can go on [remix](https://remix.ethereum.org/) to interact with the contract with metasmask (injected provider) and the ABI.
 
 ## Usage
 

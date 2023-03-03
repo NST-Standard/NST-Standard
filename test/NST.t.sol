@@ -3,7 +3,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import {PermissiveNST} from "test/base/MockNST.sol";
+import {PermissiveNST} from "src/mocks/PermissiveNST.sol";
 
 import {NST, INST} from "src/NST.sol";
 
@@ -27,8 +27,8 @@ contract NST_test is Test {
 
     function setUp() public {
         // deploy two NST contracts
-        ticket = new PermissiveNST("Ticket", "TCK");
-        discount = new PermissiveNST("Discount", "D");
+        ticket = new PermissiveNST("Ticket", "TCK", "ipfs://{...}");
+        discount = new PermissiveNST("Discount", "D", "ipfs://{...}");
         TICKET = address(ticket);
         DISCOUNT = address(discount);
 
