@@ -24,6 +24,9 @@ contract NST is ERC721, EIP712, INST {
     /// @dev Hash of the message/struct to sign and send
     bytes32 public immutable override SINGLE_EXCHANGE_TYPEHASH;
     bytes32 public immutable override MULTIPLE_EXCHANGE_TYPEHASH;
+    bytes32 public immutable override TOKEN_TYPEHASH;
+    bytes32 public immutable override TOKENS_TYPEHASH;
+    bytes32 public immutable override MESSAGE_TYPEHASH;
 
     /// @dev Users nonces to protect against replay attack
     mapping(address => uint256) private _nonces;
@@ -37,21 +40,46 @@ contract NST is ERC721, EIP712, INST {
         _;
     }
 
-    constructor(string memory name_, string memory symbol_)
-        ERC721(name_, symbol_)
-        EIP712(name_, "1")
-    {
-        string memory messageStruct = "Message(address owner,uint256 nonce)";
+    constructor(
+        string memory name_,
+        string memory symbol_
+    ) ERC721(name_, symbol_) EIP712(name_, "1") {
+        string
+            memory tokenType = "Token(address tokenAddr,uint256 tokenId,uint256 amount)";
+        string
+            memory tokensType = "Tokens(address tokenAddr,uint256[] tokenIds,uint256[] amounts)";
+        string memory messageType = "Message(address owner,uint256 nonce)";
+
+        TOKEN_TYPEHASH = keccak256(abi.encodePacked(tokenType));
+        TOKENS_TYPEHASH = keccak256(abi.encodePacked(tokensType));
+        MESSAGE_TYPEHASH = keccak256(abi.encodePacked(messageType));
+        // SINGLE_EXCHANGE_TYPEHASH = keccak256(
+        //     abi.encodePacked(
+        //         "SingleExchange(Token bid, Token ask, Message message)",
+        //         tokenType,
+        //         messageType
+        //     )
+        // );
+        // MULTIPLE_EXCHANGE_TYPEHASH = keccak256(
+        //     abi.encodePacked(
+        //         "MultipleExchange(Tokens bid, Tokens ask, Message message)Token(address tokenAddr,uint256[] tokenIds,uint256[] amounts)",
+        //         tokensType,
+        //         messageType
+        //     )
+        // );
+
         SINGLE_EXCHANGE_TYPEHASH = keccak256(
             abi.encodePacked(
-                "SingleExchange(Token bid, Token ask, Message message)Token(address tokenAddr,uint256 tokenId,uint256 amount)",
-                messageStruct
+                "SingleExchange(Token bid, Token ask, Message message)",
+                messageType,
+                "Token(address tokenAddr,uint256 tokenId,uint256 amount)"
             )
         );
         MULTIPLE_EXCHANGE_TYPEHASH = keccak256(
             abi.encodePacked(
-                "MultipleExchange(Tokens bid, Tokens ask, Message message)Token(address tokenAddr,uint256[] tokenIds,uint256[] amounts)",
-                messageStruct
+                "MultipleExchange(Tokens bid, Tokens ask, Message message)",
+                messageType,
+                "Tokens(address tokenAddr,uint256[] tokenIds,uint256[] amounts)"
             )
         );
     }
@@ -196,20 +224,12 @@ contract NST is ERC721, EIP712, INST {
     ////////////////////////////////////////////////////////////////////////////////////////////////*/
 
     /// @dev `onlyExchangeable` modifier prevent transferability outside an `exchange` call
-    function transferFrom(
-        address,
-        address,
-        uint256
-    ) public pure override {
+    function transferFrom(address, address, uint256) public pure override {
         revert("Not implemented");
     }
 
     /// @dev `onlyExchangeable` modifier prevent transferability outside an `exchange` call
-    function safeTransferFrom(
-        address,
-        address,
-        uint256
-    ) public pure override {
+    function safeTransferFrom(address, address, uint256) public pure override {
         revert("Not implemented");
     }
 
@@ -255,5 +275,11 @@ contract NST is ERC721, EIP712, INST {
         // perform ecrecover and get signer address
         address signer = typedDataHash.recover(signature);
         if (signer != messageOwner) revert InvalidSignatureOwner(signer);
+    }
+
+    function _hashSimpleExchangeStruct(
+        SingleExchange memory exchangeData
+    ) internal view returns (bytes32) {
+        return keccak256(abi.encode(SINGLE_EXCHANGE_TYPEHASH));
     }
 }

@@ -7,10 +7,11 @@ import {PermissiveNST} from "src/mocks/PermissiveNST.sol";
 
 contract deploy is Script {
     address private DEPLOYER;
+    address private ANVIL1 = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
 
     function run() public {
         // import `.env` private key
-        uint256 pk = vm.envUint("DEPLOYER_GOERLI");
+        uint256 pk = vm.envUint("DEPLOYER_ANVIL");
         DEPLOYER = vm.addr(pk);
 
         _logsDeploymentEnvironment();
@@ -23,7 +24,7 @@ contract deploy is Script {
             "QmQkrjVa6TMhuApkLNi9B8Vn9bYy9RcW8aGzrBvBRzkSLm"
         );
 
-        PermissiveNST gardenticket = new PermissiveNST(
+        PermissiveNST gardenTicket = new PermissiveNST(
             "Garden Ticket",
             "Garden",
             "QmYzkWw4bdmh7mSVcQDMyMRessTk8eY6D4pmCMXixwuE7A"
@@ -34,6 +35,26 @@ contract deploy is Script {
             "CIGAR",
             "QmQG9Zz15cNENFYCNuUoLLCcBxcf7cXRU485RMzqiLCuwo"
         );
+
+        supportTicket.allowNST(address(smokeBond));
+        supportTicket.allowNST(address(gardenTicket));
+        smokeBond.allowNST(address(supportTicket));
+        smokeBond.allowNST(address(gardenTicket));
+        gardenTicket.allowNST(address(smokeBond));
+        gardenTicket.allowNST(address(supportTicket));
+
+        supportTicket.mint(ANVIL1);
+        supportTicket.mint(ANVIL1);
+
+        smokeBond.mint(DEPLOYER);
+        smokeBond.mint(DEPLOYER);
+
+        // PermissiveNST(0x5FbDB2315678afecb367f032d93F642f64180aa3).allowNST(
+        //     0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+        // );
+        // PermissiveNST(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0).allowNST(
+        //     0x5FbDB2315678afecb367f032d93F642f64180aa3
+        // );
 
         vm.stopBroadcast();
     }
