@@ -44,42 +44,30 @@ contract NST is ERC721, EIP712, INST {
         string memory name_,
         string memory symbol_
     ) ERC721(name_, symbol_) EIP712(name_, "1") {
-        string
-            memory tokenType = "Token(address tokenAddr,uint256 tokenId,uint256 amount)";
-        string
-            memory tokensType = "Tokens(address tokenAddr,uint256[] tokenIds,uint256[] amounts)";
-        string memory messageType = "Message(address owner,uint256 nonce)";
+        // simples struct typehash
+        TOKEN_TYPEHASH = keccak256(
+            abi.encodePacked(
+                "Token(address tokenAddr,uint256 tokenId,uint256 amount)"
+            )
+        );
+        TOKENS_TYPEHASH = keccak256(
+            abi.encodePacked(
+                "Tokens(address tokenAddr,uint256[] tokenIds,uint256[] amounts)"
+            )
+        );
+        MESSAGE_TYPEHASH = keccak256(
+            abi.encodePacked("Message(address owner,uint256 nonce)")
+        );
 
-        TOKEN_TYPEHASH = keccak256(abi.encodePacked(tokenType));
-        TOKENS_TYPEHASH = keccak256(abi.encodePacked(tokensType));
-        MESSAGE_TYPEHASH = keccak256(abi.encodePacked(messageType));
-        // SINGLE_EXCHANGE_TYPEHASH = keccak256(
-        //     abi.encodePacked(
-        //         "SingleExchange(Token bid, Token ask, Message message)",
-        //         tokenType,
-        //         messageType
-        //     )
-        // );
-        // MULTIPLE_EXCHANGE_TYPEHASH = keccak256(
-        //     abi.encodePacked(
-        //         "MultipleExchange(Tokens bid, Tokens ask, Message message)Token(address tokenAddr,uint256[] tokenIds,uint256[] amounts)",
-        //         tokensType,
-        //         messageType
-        //     )
-        // );
-
+        // composed struct typehash
         SINGLE_EXCHANGE_TYPEHASH = keccak256(
             abi.encodePacked(
-                "SingleExchange(Token bid, Token ask, Message message)",
-                messageType,
-                "Token(address tokenAddr,uint256 tokenId,uint256 amount)"
+                "SingleExchange(Token bid,Token ask,Message message)Message(address owner,uint256 nonce)Token(address tokenAddr,uint256 tokenId,uint256 amount)"
             )
         );
         MULTIPLE_EXCHANGE_TYPEHASH = keccak256(
             abi.encodePacked(
-                "MultipleExchange(Tokens bid, Tokens ask, Message message)",
-                messageType,
-                "Tokens(address tokenAddr,uint256[] tokenIds,uint256[] amounts)"
+                "MultipleExchange(Tokens bid,Tokens ask,Message message)Message(address owner,uint256 nonce)Tokens(address tokenAddr,uint256[] tokenIds,uint256[] amounts)"
             )
         );
     }
@@ -93,7 +81,8 @@ contract NST is ERC721, EIP712, INST {
      * @dev Perform an `ecrecover` on the signature and (if valid) change
      * the token allowance
      *
-     * @param exchangeData struct of the message
+     * @param data struct of the message
+     * @param to recipient address
      * @param signature signature of the hashed struct following EIP712
      *
      * NOTE Only the owner of the signer message and the given token ID are
@@ -103,59 +92,31 @@ contract NST is ERC721, EIP712, INST {
      */
 
     function transferFor(
-        SingleExchange memory exchangeData,
+        SingleExchange memory data,
         address to,
         bytes memory signature
     ) external onlyExchangeable(msg.sender) {
         // reconstruct the hash of signed message and use nonce
-        bytes32 structHash = keccak256(
-            abi.encode(
-                SINGLE_EXCHANGE_TYPEHASH,
-                exchangeData.bid,
-                exchangeData.ask,
-                exchangeData.message.owner,
-                _useNonce(exchangeData.message.owner)
-            )
-        );
+        bytes32 structHash = _hashSimpleExchangeStruct(data);
 
-        _checkMessageSignature(
-            structHash,
-            exchangeData.message.owner,
-            signature
-        );
+        _checkMessageSignature(structHash, data.message.owner, signature);
 
         // transfer bid token
-        _transfer(exchangeData.message.owner, to, exchangeData.bid.tokenId);
+        _transfer(data.message.owner, to, data.bid.tokenId);
     }
 
     function transferFor(
-        MultipleExchange memory exchangeData,
+        MultipleExchange memory data,
         address to,
         bytes memory signature
     ) external onlyExchangeable(msg.sender) {
         // reconstruct the hash of signed message and use nonce
-        bytes32 structHash = keccak256(
-            abi.encode(
-                MULTIPLE_EXCHANGE_TYPEHASH,
-                exchangeData.bid,
-                exchangeData.ask,
-                exchangeData.message.owner,
-                _useNonce(exchangeData.message.owner)
-            )
-        );
+        bytes32 structHash = _hashMultipleExchangeStruct(data);
 
-        _checkMessageSignature(
-            structHash,
-            exchangeData.message.owner,
-            signature
-        );
+        _checkMessageSignature(structHash, data.message.owner, signature);
 
-        for (uint256 i; i < exchangeData.bid.tokenIds.length; ) {
-            _transfer(
-                exchangeData.message.owner,
-                to,
-                exchangeData.bid.tokenIds[i]
-            );
+        for (uint256 i; i < data.bid.tokenIds.length; ) {
+            _transfer(data.message.owner, to, data.bid.tokenIds[i]);
 
             unchecked {
                 ++i;
@@ -185,6 +146,7 @@ contract NST is ERC721, EIP712, INST {
             signature
         );
 
+        // transfer ask token
         _transfer(
             msg.sender,
             exchangeData.message.owner,
@@ -242,7 +204,8 @@ contract NST is ERC721, EIP712, INST {
      * others NST.
      * Emit {TokenExchangeabilityUpdated}
      * @param tokenAddr token address to approve
-     * */
+     *
+     */
     function _allowExchangeWith(address tokenAddr) internal {
         _exchangeable[tokenAddr] = true;
         emit TokenExchangeabilityUpdated(tokenAddr, true);
@@ -253,7 +216,8 @@ contract NST is ERC721, EIP712, INST {
      * others NST.
      * Emit {TokenExchangeabilityUpdated}
      * @param tokenAddr token address to ban
-     * */
+     *
+     */
     function _banExchangeWith(address tokenAddr) internal {
         _exchangeable[tokenAddr] = false;
         emit TokenExchangeabilityUpdated(tokenAddr, false);
@@ -278,8 +242,78 @@ contract NST is ERC721, EIP712, INST {
     }
 
     function _hashSimpleExchangeStruct(
-        SingleExchange memory exchangeData
-    ) internal view returns (bytes32) {
-        return keccak256(abi.encode(SINGLE_EXCHANGE_TYPEHASH));
+        SingleExchange memory data
+    ) internal returns (bytes32) {
+        bytes32 bidStructHash = keccak256(
+            abi.encode(
+                TOKEN_TYPEHASH,
+                data.bid.tokenAddr,
+                data.bid.tokenId,
+                data.bid.amount
+            )
+        );
+        bytes32 askStructHash = keccak256(
+            abi.encode(
+                TOKEN_TYPEHASH,
+                data.ask.tokenAddr,
+                data.ask.tokenId,
+                data.ask.amount
+            )
+        );
+        bytes32 messageStructHash = keccak256(
+            abi.encode(
+                MESSAGE_TYPEHASH,
+                data.message.owner,
+                _useNonce(data.message.owner)
+            )
+        );
+
+        return
+            keccak256(
+                abi.encode(
+                    SINGLE_EXCHANGE_TYPEHASH,
+                    bidStructHash,
+                    askStructHash,
+                    messageStructHash
+                )
+            );
+    }
+
+    function _hashMultipleExchangeStruct(
+        MultipleExchange memory data
+    ) internal returns (bytes32) {
+        bytes32 bidStructHash = keccak256(
+            abi.encode(
+                TOKENS_TYPEHASH,
+                data.bid.tokenAddr,
+                data.bid.tokenIds, // encode array?
+                data.bid.amounts
+            )
+        );
+        bytes32 askStructHash = keccak256(
+            abi.encode(
+                TOKENS_TYPEHASH,
+                data.ask.tokenAddr,
+                data.ask.tokenIds,
+                data.ask.amounts
+            )
+        );
+        bytes32 messageStructHash = keccak256(
+            abi.encode(
+                MESSAGE_TYPEHASH,
+                data.message.owner,
+                _useNonce(data.message.owner)
+            )
+        );
+
+        return
+            keccak256(
+                abi.encode(
+                    MULTIPLE_EXCHANGE_TYPEHASH,
+                    bidStructHash,
+                    askStructHash,
+                    messageStructHash
+                )
+            );
     }
 }
