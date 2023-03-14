@@ -1,16 +1,13 @@
 ---
-# Non sellable token
-
-_Non sellable token (NST) are between SBT and NFT, they cannot be freely transfered between wallet. NST implement an exchange function at the contract level. The NST implementation allow others NST to be transferable with itself_
-
-author: , Cédric Nicolas (@cedric-n-icolas),Casey (@ ), Grégoire (@ ), Kerel Verwaerde (@NSTKerel), Matthieu Chassagne (@ ), Perrin (@pgrandne), Rafael Fitoussi (@fi2c), Raphael (@RaphaelHardFork), , Virgil (@virgilea2410)
-
-discussions-to: https://t.me/Crypto_Kerel 
-status: Draft
+Title: < Non sellable token>
+Description:<Non sellable token (NST) are between SBT and NFT, they cannot be freely transfered between wallet. NST implement an exchange function at the contract level. The NST implementation allow others NST to be transferable with itself>
+author: < Cédric Nicolas (@cedric-n-icolas),Casey (@ ), Grégoire (@ ), Kerel Verwaerde (@NSTKerel), Matthieu Chassagne (@ ), Perrin (@pgrandne), Rafael Fitoussi (@fi2c), Raphael (@RaphaelHardFork), , Virgil (@virgilea2410)>
+discussions-to: <https://t.me/Crypto_Kerel> 
+status: <Draft>
 type: <Standards Track, Meta, or Informational>
-category: <Core, Networking, Interface, or ERC> # Only required for Standards Track. Otherwise, remove this field.
+category: <Core, Networking, Interface, or ERC> # Only required for Standards Track. Otherwise, remove this field.>
 created: <date created on, in ISO 8601 (yyyy-mm-dd) format>
-requires: <EIP number(s)> # Only required when you reference an EIP in the `Specification` section. Otherwise, remove this field.
+requires: <EIP number(s)> 
 
 ---
 
