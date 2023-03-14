@@ -1,6 +1,69 @@
+---
 # Non sellable token
 
 _Non sellable token (NST) are between SBT and NFT, they cannot be freely transfered between wallet. NST implement an exchange function at the contract level. The NST implementation allow others NST to be transferable with itself_
+
+author: , Cédric Nicolas (@cedric-n-icolas),Casey (@ ), Grégoire (@ ), Kerel Verwaerde (@NSTKerel), Matthieu Chassagne (@ ), Perrin (@pgrandne), Rafael Fitoussi (@fi2c), Raphael (@RaphaelHardFork), , Virgil (@virgilea2410)
+
+discussions-to: https://t.me/Crypto_Kerel 
+status: Draft
+type: <Standards Track, Meta, or Informational>
+category: <Core, Networking, Interface, or ERC> # Only required for Standards Track. Otherwise, remove this field.
+created: <date created on, in ISO 8601 (yyyy-mm-dd) format>
+requires: <EIP number(s)> # Only required when you reference an EIP in the `Specification` section. Otherwise, remove this field.
+
+---
+
+## Abstract:
+This EIP proposes a new non-sellable token (NST) standard that allows for the transfer of tokens between projects while maintaining a whitelist of authorized counterparties. NSTs would allow for the separation of price and value in the NFT market, preventing speculation from becoming the sole determinant of NFT value, as well as giving projects the ability to control the entire ecosystem for their NFTs while giving free reign for transfers within that ecosystem to their hodlers.
+ 
+
+## Motivation:
+Existing ERC token standards such as ERC-20 and ERC-721 are widely used and allow for the transfer of tokens between different projects, but they do not provide a mechanism for tokens that are not meant to be sold or transferred outside of their original project ecosystem. The proposed NST standard would provide a solution for this by enabling authorized counterparties to transfer NSTs between projects in a secure and compliant manner.
+
+The NFT market is currently highly speculative and volatile, with the price of NFTs often determining their perceived value. NSTs would help to address this issue by creating a new standard that focuses on the true value of an NFT rather than just its price with the potential of an NFT being entirely cut off from any commercial exchange.
+
+
+## Specification:
+The proposed NST standard would be based on the ERC-721 standard and would include the following additional features:
+
+A whitelist mechanism for authorized counterparties to transfer NSTs between projects
+
+
+
+- NSTs can only be transferred between whitelisted NSTs created by other projects.
+- Projects can whitelist any other NSTs for their NSTs but need to have reciprocal whitelisting.
+- NSTs are non-sellable and cannot be traded for other cryptocurrencies or fiat currencies.
+- NSTs can be created using the ERC-721 token standards.
+- NSTs can be used for various purposes, including but not limited to: access control, rewards, and governance.
+- A smart contract interface would be required to enable the transfer of NSTs between whitelisted tokens.
+- Ability to view the whitelist and transfer history of NSTs.
+- Additional optional features such as burn mechanics, auto transfers, etc. always under control by the creators.
+
+## Rationale:
+The proposed NST standard would enable projects to issue non-sellable tokens that can be transferred securely between projects with proper authorization. This would allow for a greater level of interoperability and collaboration between projects, while also maintaining control and ownership of the tokens within their respective ecosystems. The whitelist mechanism ensures that only authorized counterparties are able to transfer NSTs, reducing the risk of fraudulent or unauthorized transfers.
+
+The proposed NST standard would promote a more stable and sustainable NFT market by separating price and value. By restricting the transfer of NSTs to only whitelisted tokens, the value of an NFT would be more closely tied to its actual worth and not just its market price. This would also create new opportunities for NSTs to be used as access control tokens, rewards, governance tokens, and could help not be placed as financial assets.
+
+## Backwards Compatibility:
+The proposed NST standard would be based on the ERC-721 standard and would be backwards compatible with existing ERC-721 implementations.
+
+## Test Cases
+
+
+## Implementation:
+The proposed NST standard can be implemented as a smart contract on the Ethereum blockchain, similar to other ERC token standards. Projects interested in using the NST standard can deploy their own implementation of the smart contract and set their own whitelist of authorized counterparties. It could also be integrated into existing NFT marketplaces and platforms as a separate type of swapping.
+
+## Security Considerations:
+The proposed NST standard is subject to the same security considerations as other NFT standards and would require robust testing and auditing before deployment.
+
+## Conclusion:
+The proposed NST standard would provide a solution for projects looking to issue non-sellable tokens that can be securely transferred between projects with proper authorization. This would enable greater collaboration and interoperability between projects, while also maintaining control and ownership of the tokens within their respective ecosystems, as well as provide a new approach to NFTs that focuses on value rather than price.
+
+## Copyright
+
+
+
 
 ## Testnet POC deployment
 
