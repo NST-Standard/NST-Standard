@@ -2,6 +2,51 @@
 
 _Non sellable token (NST) are between SBT and NFT, they cannot be freely transfered between wallet. NST implement an exchange function at the contract level. The NST implementation allow others NST to be transferable with itself_
 
+
+
+## Instructions pour la création d'une EIP
+
+La liste des EIPs ainsi que le détait de la procédure à suivre est indiqué dans ce répertoire https://github.com/ethereum/EIPs
+
+#### 1° Propostion de l'idée à la gouvernance
+
+Avant d'écrire l'EIP il FAUT qu'elle soit discutée sur l'un des 2 forums :
+https://ethereum-magicians.org/ ou https://ethresear.ch/t/read-this-before-posting/8
+
+Ca signifie qu'un membre du groupe NST doit s'occuper d'alimenter ces forums pour faire connaitre notre proposition de NST et répondre aux questions, dicussions si nécessaire
+
+Ensuite si le consensus est atteint, c'est à dire que l'idée mérite d'être creusée et qu'aucune EIP y répond déjà on peut commencer le processus 
+
+#### 2° Revue de l'EIP Process
+
+La proposition d'EIP doit suivre les indications du site https://eips.ethereum.org/
+Une lecture et revue de l'EIP-1 doit être effectuée https://eips.ethereum.org/EIPS/eip-1
+Cette EIP détaille ce qu'est une EIP, son processus et ses flux et enfin donne un template à suivre pour la rédaction de l'EIP.
+
+C'est ce modèle qui a été repris par Raphael dans le fichier EIP-NST.md présent dans ce répertoire.
+Il faut donc remplir chaque champ de ce modèle pour correspondore au standart attendu et ensuite le soummetre dans le répertoire. La pull request va être analysé par un EIP Editor et si c'est accepté c'est le début du processus
+
+#### 3° Status de l'EIP
+
+Une fois qu'elle est en status Draft (accepté par un EIP Editor) l'auteur peut la modifier et la mettre à jour en fonction des échanges. Lorsque l'EIP est prête il la passe en status Review c'est à dire qu'elle doit être revues par les pairs 
+Il y a ensuite encore un long processus avec plusieurs status (last call, final, ...)
+
+#### Exemple d'EIP pour s'inspirer
+
+On peut prendre 2 EIPs pour s'inspirer:
+EIP-5192 Minimal Soulbound NFTs
+- la discussion liée à l'EIP : https://ethereum-magicians.org/t/final-eip-5192-minimal-soulbound-nfts/9814
+- l'EIP suivant le template :https://github.com/ethereum/EIPs/blob/master/EIPS/eip-5192.md
+
+EIP-4337 Account Abstraction Using Alt Mempool
+- la discussion liée à l'EIP : https://ethereum-magicians.org/t/erc-4337-account-abstraction-via-entry-point-contract-specification/7160 pour info elle début en Septembre 2021
+- l'EIP suivant le template : https://github.com/ethereum/EIPs/blob/master/EIPS/eip-4337.md Beaucoup plus complexe que les minimal SBT
+
+
+
+
+
+
 ## Testnet POC deployment
 
 **Optimism goerli:**
@@ -102,11 +147,11 @@ forge inspect ERC721 methods
 ```
 
 Necessary for retrocompability:
-|Method name|Parameters|Selector|
-|---|---|---|
-|name||`0x06fdde03`|
-|symbol||`0x95d89b41`|
-|tokenURI|`uint256` tokenId|`0xc87b56dd`|
+| Method name | Parameters        | Selector     |
+| ----------- | ----------------- | ------------ |
+| name        |                   | `0x06fdde03` |
+| symbol      |                   | `0x95d89b41` |
+| tokenURI    | `uint256` tokenId | `0xc87b56dd` |
 
 **Events:**
 
