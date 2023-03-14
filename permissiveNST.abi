@@ -138,6 +138,19 @@
   },
   {
     "inputs": [],
+    "name": "MESSAGE_TYPEHASH",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "MULTIPLE_EXCHANGE_TYPEHASH",
     "outputs": [
       {
@@ -152,6 +165,32 @@
   {
     "inputs": [],
     "name": "SINGLE_EXCHANGE_TYPEHASH",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "TOKENS_TYPEHASH",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "TOKEN_TYPEHASH",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -719,7 +758,7 @@
           }
         ],
         "internalType": "struct INST.SingleExchange",
-        "name": "exchangeData",
+        "name": "data",
         "type": "tuple"
       },
       {
@@ -805,7 +844,7 @@
           }
         ],
         "internalType": "struct INST.MultipleExchange",
-        "name": "exchangeData",
+        "name": "data",
         "type": "tuple"
       },
       {

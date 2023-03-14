@@ -4,13 +4,15 @@ _Non sellable token (NST) are between SBT and NFT, they cannot be freely transfe
 
 ## Testnet POC deployment
 
+Try on the [dApp](https://nst-dapp.vercel.app/)
+
 **Optimism goerli:**
 
-| Token name        | Token address                                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Garden ticket     | [0x1a48b20bd0f0c89f823686c2270c5404887c287c](https://goerli-optimism.etherscan.io/address/0x1a48b20bd0f0c89f823686c2270c5404887c287c) |
-| Support ticket    | [0x1ddd12d738acf870de92fd5387d90f3733d50d94](https://goerli-optimism.etherscan.io/address/0x1ddd12d738acf870de92fd5387d90f3733d50d94) |
-| Cigar credit note | [0xbecced78b7a65a0b2464869553fc0a3c2d2db935](https://goerli-optimism.etherscan.io/address/0xbecced78b7a65a0b2464869553fc0a3c2d2db935) |
+| Token name        | Token address                                                                                                                         | Metadata IPFS hash                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Garden ticket     | [0x238c88432E41F40f470f5C81bB708a7DdD8b6ec1](https://goerli-optimism.etherscan.io/address/0x238c88432E41F40f470f5C81bB708a7DdD8b6ec1) | QmcX5FcGpaouXHC1CfJZhpdjsLaeQARsPLpuNqbt7iEZVw |
+| Support ticket    | [0x45d3e4934214e0dbEcA22a641EB57b972891DF4C](https://goerli-optimism.etherscan.io/address/0x45d3e4934214e0dbEcA22a641EB57b972891DF4C) | QmcX5FcGpaouXHC1CfJZhpdjsLaeQARsPLpuNqbt7iEZVw |
+| Cigar credit note | [0xE9cf499d9a29A37610ec9fb1fD7507b55b3cbcF9](https://goerli-optimism.etherscan.io/address/0xE9cf499d9a29A37610ec9fb1fD7507b55b3cbcF9) | QmcX5FcGpaouXHC1CfJZhpdjsLaeQARsPLpuNqbt7iEZVw |
 
 **Deploy on testnet:**
 

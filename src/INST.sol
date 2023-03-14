@@ -56,6 +56,12 @@ interface INST {
 
     function MULTIPLE_EXCHANGE_TYPEHASH() external view returns (bytes32);
 
+    function TOKEN_TYPEHASH() external view returns (bytes32);
+
+    function TOKENS_TYPEHASH() external view returns (bytes32);
+
+    function MESSAGE_TYPEHASH() external view returns (bytes32);
+
     function nonce(address account) external view returns (uint256);
 
     // --- methods ---
