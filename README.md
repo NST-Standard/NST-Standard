@@ -6,7 +6,7 @@ _Non sellable token (NST) are between SBT and NFT, they cannot be freely transfe
 
 ## Instructions pour la création d'une EIP
 
-La liste des EIPs ainsi que le détait de la procédure à suivre est indiqué dans ce répertoire https://github.com/ethereum/EIPs
+La liste des EIPs ainsi que le détail de la procédure à suivre sont indiqués dans ce répertoire https://github.com/ethereum/EIPs
 
 #### 1° Propostion de l'idée à la gouvernance
 
@@ -20,7 +20,7 @@ Ensuite si le consensus est atteint, c'est à dire que l'idée mérite d'être c
 #### 2° Revue de l'EIP Process
 
 La proposition d'EIP doit suivre les indications du site https://eips.ethereum.org/
-Une lecture et revue de l'EIP-1 doit être effectuée https://eips.ethereum.org/EIPS/eip-1
+Pour ce faire, une lecture et revue de l'EIP-1 doit être effectuée https://eips.ethereum.org/EIPS/eip-1
 Cette EIP détaille ce qu'est une EIP, son processus et ses flux et enfin donne un template à suivre pour la rédaction de l'EIP.
 
 C'est ce modèle qui a été repris par Raphael dans le fichier EIP-NST.md présent dans ce répertoire.
