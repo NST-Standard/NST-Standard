@@ -42,7 +42,7 @@ The proposed NST standard would enable projects to issue non-sellable tokens tha
 The proposed NST standard would promote a more stable and sustainable NFT market by separating price and value. By restricting the transfer of NSTs to only whitelisted tokens, the value of an NFT would be more closely tied to its actual worth and not just its market price. This would also create new opportunities for NSTs to be used as access control tokens, rewards, governance tokens, and could help not be placed as financial assets.
 
 ## Backwards Compatibility:
-The proposed NST standard would be based on the ERC-721 standard and would be backwards compatible with existing ERC-721 implementations.
+The proposed NST standard would be based on the ERC-721 standard and would not be backwards compatible with existing ERC-721 implementations when it comes to the transfer between standards.
 
 ## Test Cases
 
