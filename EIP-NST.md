@@ -195,9 +195,7 @@ _This section need more informatons or be removed_
 
 ## Rationale
 
-This EIP has been designed to leverage existant features of the [ERC721]() such as `approve/allowance` and `Transfer` events and leave the full control on the implementation.
-
-Research paths explorer to solve NST and propose this EIP
+This EIP has been designed to leverage existant features of the [ERC721](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md) such as `approve/allowance` and `Transfer` events and leave the full control on the implementation.
 
 ### Permissionless barter
 
