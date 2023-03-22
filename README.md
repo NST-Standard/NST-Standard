@@ -19,6 +19,15 @@ Existing ERC token standards such as ERC-20 and ERC-721 are widely used and allo
 
 The NFT market is currently highly speculative and volatile, with the price of NFTs often determining their perceived value. NSTs would help to address this issue by creating a new standard that focuses on the true value of an NFT rather than just its price with the potential of an NFT being entirely cut off from any commercial exchange.
 
+Examples of possible use cases :
+- Video games assets that could be exchangable but non sellable, to avoid any speculation around the assets, while keeping the NFTs existing benefits.
+- Kids NSTs, in all applications dedicated to minor individuals, to avoid them to make or transact money
+- Proof of authenticity for luxury items, but avoiding any economic interest to keep the NFT to resell it separately from the physical object
+- Loyalty points: Many businesses offer loyalty programmes to their customers to encourage them to return. These programmes typically award points or other rewards for purchases made at the business. Using a standard non-sellable token, businesses could issue tokens that can only be used for shop credit or other non-cash rewards, ensuring that customers cannot redeem them for cash.
+- Access to exclusive content: Musicians, artists and other creators often offer exclusive content to their fans in exchange for support. Using a standard non-sellable token, creators can create tokens that give access to this exclusive content, but which cannot be sold or traded. This would help to ensure that content remains exclusive and that creators are properly compensated for their work.
+- Environmental credits: Governments and companies often issue environmental credits to encourage people to adopt sustainable practices. Using a standard non-sellable token, these credits could be issued as tokens that can only be used for specific purposes, such as funding environmental projects or purchasing sustainable products.
+- Event tickets: Ticket hijacking is a common problem for many popular events and can force fans to pay inflated prices for tickets. By using a non-sellable token standard, event organisers could create tickets that cannot be resold, ensuring that fans can only buy tickets at face value.
+- Proxy: Use of a non-saleable token to give a proxy at a shareholders' meeting
 
 ## Specification:
 The proposed NST standard would be based on the ERC-721 standard and would include the following additional features:
