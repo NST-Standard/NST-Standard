@@ -2,13 +2,13 @@
 
 pragma solidity ^0.8.13;
 
-import {ERCN} from "../ERCN.sol";
+import {ERC_NMultiBarter} from "../extensions/ERC_NMultiBarter.sol";
 
-contract PermissionlessERCN is ERCN {
+contract PermissionlessERC_NMultiBarter is ERC_NMultiBarter {
     constructor(
         string memory _name,
         string memory _symbol
-    ) ERCN(_name, _symbol) {}
+    ) ERC_NMultiBarter(_name, _symbol) {}
 
     function mint(address account, uint256 tokenId) public {
         _mint(account, tokenId);

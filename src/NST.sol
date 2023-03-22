@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.13;
 
-import {ERC721, IERC721} from "openzeppelin-contracts/token/ERC721/ERC721.sol";
-import {EIP712} from "openzeppelin-contracts/utils/cryptography/EIP712.sol";
-import {ECDSA} from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
+import {ERC721, IERC721} from "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import {EIP712} from "openzeppelin-contracts/contracts/utils/cryptography/EIP712.sol";
+import {ECDSA} from "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 
 import {INST} from "src/INST.sol";
 

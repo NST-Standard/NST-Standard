@@ -5,17 +5,16 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 
 import {Utils} from "./Utils.t.sol";
-import {PermissionlessERCN} from "../contracts/mocks/PermissionlessERCN.sol";
-import {ERCN} from "../contracts/ERCN.sol";
-import {IERCN} from "../contracts/IERCN.sol";
+import {PermissionlessERC_NMultiBarter} from "../contracts/mocks/PermissionlessERC_NMultiBarter.sol";
+import {IERC_N} from "../contracts/IERC_N.sol";
 
 contract ERCN_test is Test, Utils {
     using stdStorage for StdStorage;
 
     // tokens
-    PermissionlessERCN internal ticket;
+    PermissionlessERC_NMultiBarter internal ticket;
     address internal TICKET;
-    PermissionlessERCN internal discount;
+    PermissionlessERC_NMultiBarter internal discount;
     address internal DISCOUNT;
 
     // users and their private keys
@@ -30,9 +29,9 @@ contract ERCN_test is Test, Utils {
 
     function setUp() public {
         // deploy tokens
-        ticket = new PermissionlessERCN("Ticket", "00");
+        ticket = new PermissionlessERC_NMultiBarter("Ticket", "00");
         TICKET = address(ticket);
-        discount = new PermissionlessERCN("Discount", "01");
+        discount = new PermissionlessERC_NMultiBarter("Discount", "01");
         DISCOUNT = address(discount);
 
         // enable barters
@@ -68,7 +67,7 @@ contract ERCN_test is Test, Utils {
         discount.mint(USER2, 12);
 
         (
-            IERCN.PureBarterTerms memory data,
+            IERC_N.BarterTerms memory data,
             bytes memory signature
         ) = workaround_User1Ask(DISCOUNT, 12);
 
@@ -87,7 +86,7 @@ contract ERCN_test is Test, Utils {
         discount.mint(USER2, 12);
 
         (
-            IERCN.PureBarterTerms memory data,
+            IERC_N.BarterTerms memory data,
             bytes memory signature
         ) = workaround_User1Ask(DISCOUNT, 12);
 
@@ -122,7 +121,7 @@ contract ERCN_test is Test, Utils {
         ticket.mint(USER2, 50);
 
         (
-            IERCN.PureBarterTerms memory data,
+            IERC_N.BarterTerms memory data,
             bytes memory signature
         ) = workaround_User1Ask(TICKET, 50);
 
@@ -139,7 +138,7 @@ contract ERCN_test is Test, Utils {
         ticket.enableBarterWith(TICKET);
 
         (
-            IERCN.PureBarterTerms memory data,
+            IERC_N.BarterTerms memory data,
             bytes memory signature
         ) = workaround_User1Ask(TICKET, 50);
 
@@ -155,7 +154,7 @@ contract ERCN_test is Test, Utils {
         discount.mint(USER2, 12);
 
         (
-            IERCN.PureBarterTerms memory data,
+            IERC_N.BarterTerms memory data,
             bytes memory signature
         ) = workaround_User1Ask(DISCOUNT, 12);
 
@@ -182,11 +181,39 @@ contract ERCN_test is Test, Utils {
         // try a new barter
         vm.prank(USER2);
         vm.expectRevert(
-            abi.encodeWithSignature(
-                "InvalidSignatureOwner(address)",
-                0x658A6BeB176F50Bed0F6D5ea0e7d80e24C6Dd8A8 // unpredictable
-            )
+            abi.encodeWithSignature("InvalidNonce(address,uint256)", USER1, 1)
         );
+        discount.barter(data, signature);
+    }
+
+    function test_barter_CannotUseAnExpiredSignature() public {
+        vm.warp(1000);
+        (
+            IERC_N.BarterTerms memory data,
+            bytes32 structHash
+        ) = workaround_CreateBarterTerms({
+                bidTokenAddr: TICKET,
+                bidTokenId: 25,
+                askTokenAddr: DISCOUNT,
+                askTokenId: 12,
+                nonce: ticket.nonce(USER1),
+                owner: USER1,
+                deadline: 2000
+            });
+        bytes32 typedDataHash = workaround_EIP712TypedData(
+            structHash,
+            ticket.name(),
+            "1",
+            TICKET
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(USER1_PK, typedDataHash);
+        bytes memory signature = bytes.concat(r, s, bytes1(v));
+
+        vm.warp(3000);
+
+        vm.prank(USER2);
+        vm.expectRevert(abi.encodeWithSignature("SignatureExpired()"));
         discount.barter(data, signature);
     }
 
@@ -196,17 +223,18 @@ contract ERCN_test is Test, Utils {
     function workaround_User1Ask(
         address tokenAddr,
         uint256 tokenId
-    ) internal view returns (IERCN.PureBarterTerms memory, bytes memory) {
+    ) internal view returns (IERC_N.BarterTerms memory, bytes memory) {
         (
-            IERCN.PureBarterTerms memory data,
+            IERC_N.BarterTerms memory data,
             bytes32 structHash
-        ) = workaround_CreatePureBarterTerms({
+        ) = workaround_CreateBarterTerms({
                 bidTokenAddr: TICKET,
                 bidTokenId: 25,
                 askTokenAddr: tokenAddr,
                 askTokenId: tokenId,
+                nonce: ticket.nonce(USER1),
                 owner: USER1,
-                nonce: ticket.nonce(USER1)
+                deadline: type(uint48).max
             });
 
         bytes32 typedDataHash = workaround_EIP712TypedData(
@@ -221,4 +249,6 @@ contract ERCN_test is Test, Utils {
 
         return (data, signature);
     }
+
+    // function workaround_SignTypedData()
 }

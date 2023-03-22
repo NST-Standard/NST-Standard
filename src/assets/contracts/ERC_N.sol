@@ -2,24 +2,24 @@
 
 pragma solidity ^0.8.13;
 
-import {ERC721, IERC721} from "openzeppelin-contracts/token/ERC721/ERC721.sol";
-import {EIP712} from "openzeppelin-contracts/utils/cryptography/EIP712.sol";
-import {ECDSA} from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
+import {ERC721, IERC721} from "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import {EIP712} from "openzeppelin-contracts/contracts/utils/cryptography/EIP712.sol";
+import {ECDSA} from "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 
-import {IERCN} from "./IERCN.sol";
+import {IERC_N} from "./IERC_N.sol";
 
-contract ERCN is ERC721, EIP712, IERCN {
+contract ERC_N is ERC721, EIP712, IERC_N {
     using ECDSA for bytes32;
 
     error BarterNotEnabled(address tokenAddr);
+    error InvalidNonce(address owner, uint256 expectedNonce);
+    error SignatureExpired();
     error InvalidSignatureOwner(address expectedOwner);
     error NotOwnerNorApproved(address attempter, uint256 tokenId);
 
     /// @dev Hash of the message/struct to sign and send
-    bytes32 public immutable override PURE_BARTER_TERMS_TYPEHASH;
-    bytes32 public immutable override MULTI_BARTER_TERMS_TYPEHASH;
+    bytes32 public immutable override BARTER_TERMS_TYPEHASH;
     bytes32 public immutable override COMPONANT_TYPEHASH;
-    bytes32 public immutable override MULTI_COMPONANT_TYPEHASH;
 
     /// @dev Users nonces to protect against replay attack
     mapping(address => uint256) private _nonces;
@@ -37,23 +37,12 @@ contract ERCN is ERC721, EIP712, IERCN {
         string memory name_,
         string memory symbol_
     ) ERC721(name_, symbol_) EIP712(name_, "1") {
-        // simples struct typehash
         COMPONANT_TYPEHASH = keccak256(
             abi.encodePacked("Componant(address tokenAddr,uint256 tokenId)")
         );
-        MULTI_COMPONANT_TYPEHASH = keccak256(
+        BARTER_TERMS_TYPEHASH = keccak256(
             abi.encodePacked(
-                "MultiComponant(address tokenAddr,uint256[] tokenIds)"
-            )
-        );
-        PURE_BARTER_TERMS_TYPEHASH = keccak256(
-            abi.encodePacked(
-                "PureBarterTerms(Componant bid,Componant ask,address owner,uint256 nonce)Componant(address tokenAddr,uint256 tokenId)"
-            )
-        );
-        MULTI_BARTER_TERMS_TYPEHASH = keccak256(
-            abi.encodePacked(
-                "MultiBarterTerms(MultiComponant bid,MultiComponant ask,address owner,uint256 nonce)MultiComponant(address tokenAddr,uint256[] tokenIds)"
+                "BarterTerms(Componant bid,Componant ask,uint256 nonce,address owner,uint48 deadline)Componant(address tokenAddr,uint256 tokenId)"
             )
         );
     }
@@ -62,13 +51,13 @@ contract ERCN is ERC721, EIP712, IERCN {
                                               PUBLIC FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////////////////////////*/
     /**
-     * @notice See {IPureBarter}
+     * @notice See {IERC_N}
      */
     function barter(
-        PureBarterTerms memory data,
+        BarterTerms memory data,
         bytes memory signature
     ) external onlyExchangeable(data.bid.tokenAddr) {
-        IERCN(data.bid.tokenAddr).transferFor(data, msg.sender, signature);
+        IERC_N(data.bid.tokenAddr).transferFor(data, msg.sender, signature);
 
         // transfer ask token
         if (!_isApprovedOrOwner(msg.sender, data.ask.tokenId))
@@ -77,35 +66,14 @@ contract ERCN is ERC721, EIP712, IERCN {
     }
 
     /**
-     * @notice See {IMultiBarter}
-     */
-    function barter(
-        MultiBarterTerms memory data,
-        bytes memory signature
-    ) external onlyExchangeable(data.bid.tokenAddr) {
-        IERCN(data.bid.tokenAddr).transferFor(data, msg.sender, signature);
-
-        for (uint256 i; i < data.ask.tokenIds.length; ) {
-            if (!_isApprovedOrOwner(data.owner, data.ask.tokenIds[i]))
-                revert NotOwnerNorApproved(data.owner, data.ask.tokenIds[i]);
-            _transfer(msg.sender, data.owner, data.ask.tokenIds[i]);
-
-            unchecked {
-                ++i;
-            }
-        }
-    }
-
-    /**
-     * @notice see {IPureBarter}
+     * @notice see {IERC_N}
      */
     function transferFor(
-        PureBarterTerms memory data,
+        BarterTerms memory data,
         address to,
         bytes memory signature
     ) external onlyExchangeable(msg.sender) {
-        // reconstruct the hash of signed message and use nonce
-        bytes32 structHash = _hashPureBarterTerms(data);
+        bytes32 structHash = _checkAndDisgestData(data);
 
         address signer = _checkMessageSignature(
             structHash,
@@ -117,31 +85,6 @@ contract ERCN is ERC721, EIP712, IERCN {
         if (!_isApprovedOrOwner(signer, data.bid.tokenId))
             revert NotOwnerNorApproved(signer, data.bid.tokenId);
         _transfer(data.owner, to, data.bid.tokenId);
-    }
-
-    function transferFor(
-        MultiBarterTerms memory data,
-        address to,
-        bytes memory signature
-    ) external onlyExchangeable(msg.sender) {
-        // reconstruct the hash of signed message and use nonce
-        bytes32 structHash = _hashMultiBarterTerms(data);
-
-        address signer = _checkMessageSignature(
-            structHash,
-            data.owner,
-            signature
-        );
-
-        for (uint256 i; i < data.bid.tokenIds.length; ) {
-            if (!_isApprovedOrOwner(signer, data.bid.tokenIds[i]))
-                revert NotOwnerNorApproved(signer, data.bid.tokenIds[i]);
-            _transfer(data.owner, to, data.bid.tokenIds[i]);
-
-            unchecked {
-                ++i;
-            }
-        }
     }
 
     /*////////////////////////////////////////////////////////////////////////////////////////////////
@@ -180,6 +123,18 @@ contract ERCN is ERC721, EIP712, IERCN {
     /*////////////////////////////////////////////////////////////////////////////////////////////////
                                           INTERNAL FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////////////////////////*/
+    function _checkMessageSignature(
+        bytes32 structHash,
+        address messageOwner,
+        bytes memory signature
+    ) internal view returns (address) {
+        bytes32 typedDataHash = _hashTypedDataV4(structHash);
+
+        // perform ecrecover and get signer address
+        address signer = typedDataHash.recover(signature);
+        if (signer != messageOwner) revert InvalidSignatureOwner(signer);
+        return signer;
+    }
 
     /**
      * @dev Internal function to implement for allowing transfer with
@@ -204,28 +159,25 @@ contract ERCN is ERC721, EIP712, IERCN {
         emit BarterNetworkUpdated(tokenAddr, false);
     }
 
-    function _useNonce(address account) internal returns (uint256) {
-        unchecked {
-            return _nonces[account]++;
-        }
+    function _commitMessageData(
+        uint256 _nonce,
+        address _owner,
+        uint48 _deadline
+    ) internal {
+        // check and increment owner nonce
+        uint256 expectedNonce = _nonces[_owner]++;
+        if (expectedNonce != _nonce) revert InvalidNonce(_owner, expectedNonce);
+
+        // check data expiracy
+        if (block.timestamp > _deadline) revert SignatureExpired();
     }
 
-    function _checkMessageSignature(
-        bytes32 structHash,
-        address messageOwner,
-        bytes memory signature
-    ) internal view returns (address) {
-        bytes32 typedDataHash = _hashTypedDataV4(structHash);
+    function _checkAndDisgestData(
+        BarterTerms memory data
+    ) private returns (bytes32) {
+        _commitMessageData(data.nonce, data.owner, data.deadline);
 
-        // perform ecrecover and get signer address
-        address signer = typedDataHash.recover(signature);
-        if (signer != messageOwner) revert InvalidSignatureOwner(signer);
-        return signer;
-    }
-
-    function _hashPureBarterTerms(
-        PureBarterTerms memory data
-    ) internal returns (bytes32) {
+        // disgest data following EIP712
         bytes32 bidStructHash = keccak256(
             abi.encode(COMPONANT_TYPEHASH, data.bid.tokenAddr, data.bid.tokenId)
         );
@@ -236,41 +188,12 @@ contract ERCN is ERC721, EIP712, IERCN {
         return
             keccak256(
                 abi.encode(
-                    PURE_BARTER_TERMS_TYPEHASH,
+                    BARTER_TERMS_TYPEHASH,
                     bidStructHash,
                     askStructHash,
+                    data.nonce,
                     data.owner,
-                    _useNonce(data.owner)
-                )
-            );
-    }
-
-    function _hashMultiBarterTerms(
-        MultiBarterTerms memory data
-    ) internal returns (bytes32) {
-        bytes32 bidStructHash = keccak256(
-            abi.encode(
-                MULTI_COMPONANT_TYPEHASH,
-                data.bid.tokenAddr,
-                data.bid.tokenIds // encode array?
-            )
-        );
-        bytes32 askStructHash = keccak256(
-            abi.encode(
-                MULTI_COMPONANT_TYPEHASH,
-                data.ask.tokenAddr,
-                data.ask.tokenIds // encode array?
-            )
-        );
-
-        return
-            keccak256(
-                abi.encode(
-                    MULTI_BARTER_TERMS_TYPEHASH,
-                    bidStructHash,
-                    askStructHash,
-                    data.owner,
-                    _useNonce(data.owner)
+                    data.deadline
                 )
             );
     }

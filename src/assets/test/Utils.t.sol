@@ -2,7 +2,8 @@
 
 pragma solidity ^0.8.13;
 
-import {IERCN, IPureBarter, IMultiBarter} from "../contracts/IERCN.sol";
+import {PermissionlessERC_NMultiBarter} from "../contracts/mocks/PermissionlessERC_NMultiBarter.sol";
+import {IERC_N} from "../contracts/IERC_N.sol";
 
 contract Utils {
     bytes32 internal constant EIP712_TYPEHASH =
@@ -20,16 +21,16 @@ contract Utils {
                 "MultiComponant(address tokenAddr,uint256[] tokenIds)"
             )
         );
-    bytes32 internal constant PURE_BARTER_TERMS_TYPEHASH =
+    bytes32 internal constant BARTER_TERMS_TYPEHASH =
         keccak256(
             abi.encodePacked(
-                "PureBarterTerms(Componant bid,Componant ask,address owner,uint256 nonce)Componant(address tokenAddr,uint256 tokenId)"
+                "BarterTerms(Componant bid,Componant ask,uint256 nonce,address owner,uint48 deadline)Componant(address tokenAddr,uint256 tokenId)"
             )
         );
     bytes32 internal constant MULTI_BARTER_TERMS_TYPEHASH =
         keccak256(
             abi.encodePacked(
-                "MultiBarterTerms(MultiComponant bid,MultiComponant ask,address owner,uint256 nonce)MultiComponant(address tokenAddr,uint256[] tokenIds)"
+                "MultiBarterTerms(MultiComponant bid,MultiComponant ask,uint256 nonce,address owner,uint48 deadline)MultiComponant(address tokenAddr,uint256[] tokenIds)"
             )
         );
 
@@ -68,27 +69,31 @@ contract Utils {
             );
     }
 
-    function workaround_CreatePureBarterTerms(
+    function workaround_CreateBarterTerms(
         address bidTokenAddr,
         uint256 bidTokenId,
         address askTokenAddr,
         uint256 askTokenId,
+        uint256 nonce,
         address owner,
-        uint256 nonce
+        uint48 deadline
     )
         internal
         pure
-        returns (IPureBarter.PureBarterTerms memory data, bytes32 structHash)
+        returns (
+            PermissionlessERC_NMultiBarter.BarterTerms memory data,
+            bytes32 structHash
+        )
     {
-        IPureBarter.Componant memory bid = IPureBarter.Componant({
+        PermissionlessERC_NMultiBarter.Componant memory bid = IERC_N.Componant({
             tokenAddr: bidTokenAddr,
             tokenId: bidTokenId
         });
-        IPureBarter.Componant memory ask = IPureBarter.Componant({
+        PermissionlessERC_NMultiBarter.Componant memory ask = IERC_N.Componant({
             tokenAddr: askTokenAddr,
             tokenId: askTokenId
         });
-        data = IPureBarter.PureBarterTerms(bid, ask, owner, nonce);
+        data = IERC_N.BarterTerms(bid, ask, nonce, owner, deadline);
 
         bytes32 bidStructHash = keccak256(
             abi.encode(COMPONANT_TYPEHASH, bidTokenAddr, bidTokenId)
@@ -98,11 +103,12 @@ contract Utils {
         );
         structHash = keccak256(
             abi.encode(
-                PURE_BARTER_TERMS_TYPEHASH,
+                BARTER_TERMS_TYPEHASH,
                 bidStructHash,
                 askStructHash,
+                nonce,
                 owner,
-                nonce
+                deadline
             )
         );
     }
