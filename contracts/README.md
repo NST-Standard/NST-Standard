@@ -4,14 +4,14 @@
 
 **ERC-N implementations:**
 
-- [IERC_N.sol](./contracts/IERC_N.sol): interface of `ERC_N`
-- [ERC_N.sol](./contracts/ERC_N.sol): a simple and minimal implementation for one-to-one barter type
-- [ERC_NMultiBarter.sol](./contracts/extensions/ERC_NMultiBarter.sol): an extensions of `ERC_N.sol` for barter several token belonging to the same contract
+- [IERC_N.sol](./IERC_N.sol): interface of `ERC_N`
+- [ERC_N.sol](./ERC_N.sol): a simple and minimal implementation for one-to-one barter type
+- [ERC_NMultiBarter.sol](./extensions/ERC_NMultiBarter.sol): an extensions of `ERC_N.sol` for barter several token belonging to the same contract
 
 **Mocks contracts:**
 
-- [PermissionlessERC_N.sol](./contracts/mocks/PermissionlessERC_N.sol): an exemple of implementation of `ERC_N`
-- [PermissionlessERC_NMultiBarter.sol](./contracts/mocks/PermissionlessERC_NMultiBarter.sol): an exemple of implementation of `ERC_NMultiBarter`
+- [PermissionlessERC_N.sol](./mocks/PermissionlessERC_N.sol): an exemple of implementation of `ERC_N`
+- [PermissionlessERC_NMultiBarter.sol](./mocks/PermissionlessERC_NMultiBarter.sol): an exemple of implementation of `ERC_NMultiBarter`
 
 _These contract are used in `test`_
 
