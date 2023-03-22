@@ -8,7 +8,7 @@ status: Draft
 type: Standards Track
 category: ERC
 created: 2023-03-15
-requires: 165, 712, 721, (1271)
+requires: 712, 721
 ---
 
 ## Abstract
@@ -53,37 +53,34 @@ sequenceDiagram
 
 ### NST
 
-#### Methods
-
 In the following the `BarterTerms` struct is defined as follows:
 
 ```solidity
-struct BarterTerms {
-    Componant bid;
-    Componant ask;
-    Message message;
-}
-
 struct Componant {
     address tokenAddr;
     uint256 tokenId;
 }
 
-struct Message {
-    address owner;
+struct BarterTerms {
+    Componant bid;
+    Componant ask;
     uint256 nonce;
+    address owner;
+    uint48 deadline;
 }
 ```
 
-See [Define the barter terms](#define-the-barter-terms) section for precisions on this struct.
+See [Define the barter terms](#define-the-barter-terms) section for precisions about this struct.
+
+#### Methods
 
 ##### transferFor
 
-Verify signature following the [EIP-712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) procedure, increase the nonce of `data.message.owner` and transfers the `data.bid.tokenId` to `to` account.
+Verify signature following the [EIP-712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) procedure, increase the nonce of `data.owner` and transfers the `data.bid.tokenId` to `to` account.
 
 This function MUST be called only by authorized NST contract, the call MUST occurs when users calling the `barter` function.
 
-NOTE: using [ECDSA.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/ECDSA.sol) (`v4.7.3` at least) and [EIP712.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/EIP712.sol) library from OpenZeppelin is very RECOMMANDED for signature verifications, verification only based on `ecrecover` SHOULD NOT be used.
+**NOTE:** using [ECDSA.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/ECDSA.sol) (`v4.7.3` at least) and [EIP712.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/EIP712.sol) library from OpenZeppelin is very RECOMMANDED for signature verifications, verification only based on `ecrecover` SHOULD NOT be used (see [Solidity documentation](https://docs.soliditylang.org/en/latest/units-and-global-variables.html#mathematical-and-cryptographic-functions)).
 
 ```solidity
 function transferFor(BarterTerms memory data, address to, bytes memory signature) external;
@@ -91,7 +88,7 @@ function transferFor(BarterTerms memory data, address to, bytes memory signature
 
 ##### barter
 
-Calls the `transferFor` function on the `data.bid.tokenAddr`, MAY be self, and transfers `data.bid.tokenId` to `data.message.owner`
+Calls `transferFor` function on the `data.bid.tokenAddr`, MAY be self, and transfers `data.bid.tokenId` to `data.owner`
 
 This function MUST check if `data.bid.tokenAddr` is an authorized contract before calling `transferFor`
 
@@ -101,9 +98,9 @@ function barter(BarterTerms memory data, bytes memory signature) external;
 
 ##### nonce
 
-Returns successful barter concluded as bidder/proposer.
+Returns the counter state of successful barters concluded as bidder/proposer.
 
-This value MUST be included in the barter terms signed message to prevents a signature from being used multiple times.
+This value MUST be included in the signed message to prevents a signature from being used multiple times.
 
 ```solidity
 function nonce(address account) external view returns (uint256);
@@ -137,26 +134,28 @@ Barter terms are represented as the `barter` function's arguments and MUST:
   - contract address
   - token ID
 - include for the signer:
-  - address of the signer
   - a nonce to prevent signature reuse
+  - address of the signer
+  - a timestamp deadline
 
 Barter terms MAY be represented as nested struct as follows:
 
 ```solidity
-struct BarterTerms {
-    Componant bid;
-    Componant ask;
-    Message message;
-}
-
 struct Componant {
     address tokenAddr;
     uint256 tokenId;
 }
 
 struct Message {
-    address owner;
     uint256 nonce;
+    address owner;
+    uint48 deadline;
+}
+
+struct BarterTerms {
+    Componant bid;
+    Componant ask;
+    Message message;
 }
 ```
 
@@ -164,15 +163,15 @@ Barters MAY be declined into several types, if any, `barter` and `transferFor` M
 
 ```solidity
 {...}
+struct MultiComponant {
+    address tokenAddr;
+    uint256[] tokenIds;
+}
+
 struct MultiBarterTerms {
     MultiComponant bid;
     MultiComponant ask;
     Message message;
-}
-
-struct MultiComponant {
-    address tokenAddr;
-    uint256[] tokenIds;
 }
 
 function barter(BarterTerms memory data, bytes memory signature) external;
@@ -186,12 +185,6 @@ Every contracts compliant with this EIP MUST implement [ERC721](https://github.c
 - `safeTransferFrom(address,address,uint256,bytes)` (`0xb88d4fde`)
 - `safeTransferFrom(address,address,uint256)` (`0x42842e0e`)
 - `transferFrom(address,address,uint256)` (`0x23b872dd`)
-
-#### [ERC165](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-165.md) compliance
-
-NST contracts SHALL implement the `ERC165` interface as specified in the [ERC721](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md).
-
-_This section need more informatons or be removed_
 
 ## Rationale
 
@@ -219,53 +212,47 @@ Leaving this method permissionless would lead to the possibility to self transfe
 
 Using `barter` without restriction open the risk of unwanted barter between non-equivalent NST. Thus any valueless NST could be used to perform a one-way transfer.
 
----
+### NSTs barterable network
 
-WIP 👇
-
----
+Implementing barter at the contract level allow to create an interoperable network of barterable NST, we believe that project which want to implement this EIP are incentived to be easily interoperable with others to improve the usage of their tokens.
 
 ### Multi NST contract barter
 
-As the barterable network is set at the contract level, performing a barter implies to have signature of the both part and verify one signature for on token.
+Implementing a many-to-many NST contract is quite imossible as the barter occurs at the contract level, therefore implement such feature require to call and write on each NST contracts. The gas usage for such feature would be too expensive.
 
 ### Register of allowed NST
 
-Managed by a DAO, NST network better...
+Creating an universal register for barter allowances between NST contract (like the [EIP-1820](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1820.md)) would be hard to maintain and easy to bypass.
 
 ### Third party protocol
 
-Implement as a protocol for NFT swap like [Sudoswap](https://otc.sudoswap.xyz/#/create), still have EIP721 properties.
-
-### "Barter" word choice
-
-see [NFT word choice](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md#rationale)
-
-### "NST" word choice
-
-### Work from a minimal ERC721 interface
-
-This still allow to rely on `Transfer` event and `allowances` features and maintaining a fully backward compability.
+Implementing a service for barter NFT is already existant (see [Sudoswap](https://otc.sudoswap.xyz/#/create)). Such a service still enable one-way transfer through EIP721 properties and thus not prevent the sellability of the token.
 
 ## Backwards Compatibility
 
-This proposal is fully backward compatible with [EIP-721](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md)
+Excepted disabled methods specified in [Contract interface](#contract-interface), this EIP is backward compatible with [EIP-721](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md).
 
 ## Test Cases
 
-(Link to reference implementation test suite.) Written using Foundry
+The references implementation includes unit tests written using Foundry
 
 ## Reference Implementation
 
-Link to the minimal implementation contracts (can be the same as Test Cast)
+[Implementations examples](../assets/eip-n) has been designed for this proposal.
 
 ## Security Considerations
 
-Front runnning attack when not specifying the tokenID (must be included in rational?)
+### Sign and broadcast signed messages
 
-Or leave:
+In regards to [EIP-712 security considerations](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md#security-considerations), we includes in the [Specification](#specification) that signed including barter terms must include a `nonce` to avoid replay attack, `tokenAddr` and the `tokenId` to avoid front-running attack on a barter.
 
-Needs discussion.
+Moreover adding a `deadline` is also recommanded in case of non-used signed message.
+
+### Allowing barter between NST
+
+Enable barter between NST should be designed as a privilege for the token owner (EOA, multisig, DAO, ...) but even with this restriction this latter should pay a particular attention on the implementation of the NST.
+
+Every barter rely on an external call of the `transferFor` function, keep in mind that malicious actors can implement fake signature verification and/or not implement the transfer of token.
 
 ## Copyright
 
