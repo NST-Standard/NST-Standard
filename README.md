@@ -1,8 +1,8 @@
 ---
 Title:< Non sellable token>
 Description:<Non sellable token (NST) are between SBT and NFT, they cannot be freely transfered between wallet. NST implement an exchange function at the contract level. The NST implementation allow others NST to be transferable with itself>
-'author:< Cédric Nicolas (@cedric-n-icolas),Casey (@ ), Grégoire (@ ), Kerel Verwaerde (@NSTKerel), Matthieu Chassagne (@ ), Perrin (@pgrandne), Rafael Fitoussi (@fi2c), Raphael (@RaphaelHardFork),  Virgil (@virgilea2410)>'
-discussions-to: <https://t.me/Crypto_Kerel> 
+author:< Cédric Nicolas (@cedric-n-icolas),Casey (@ ), Grégoire (@ ), Kerel Verwaerde (@NSTKerel), Matthieu Chassagne (@ ), Perrin (@pgrandne), Rafael Fitoussi (@fi2c), Raphael (@RaphaelHardFork),  Virgil (@virgilea2410)>
+discussions-to:<https://t.me/Crypto_Kerel> 
 status:<Draft>
 type:<Standards Track, Meta, or Informational>
 category:<Core, Networking, Interface, or ERC>
