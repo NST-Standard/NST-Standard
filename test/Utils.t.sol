@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 
 import {PermissionlessERC_NMultiBarter} from "../contracts/mocks/PermissionlessERC_NMultiBarter.sol";
 import {IERC_N} from "../contracts/IERC_N.sol";
+import {ERC_NMultiBarter} from "../contracts/extensions/ERC_NMultiBarter.sol";
 
 contract Utils {
     bytes32 internal constant EIP712_TYPEHASH =
@@ -104,6 +105,66 @@ contract Utils {
         structHash = keccak256(
             abi.encode(
                 BARTER_TERMS_TYPEHASH,
+                bidStructHash,
+                askStructHash,
+                nonce,
+                owner,
+                deadline
+            )
+        );
+    }
+
+    function workaround_CreateMultiBarterTerms(
+        address bidTokenAddr,
+        uint256[] memory bidTokenIds,
+        address askTokenAddr,
+        uint256[] memory askTokenIds,
+        uint256 nonce,
+        address owner,
+        uint48 deadline
+    )
+        internal
+        pure
+        returns (
+            PermissionlessERC_NMultiBarter.MultiBarterTerms memory data,
+            bytes32 structHash
+        )
+    {
+        PermissionlessERC_NMultiBarter.MultiComponant
+            memory bid = ERC_NMultiBarter.MultiComponant({
+                tokenAddr: bidTokenAddr,
+                tokenIds: bidTokenIds
+            });
+        PermissionlessERC_NMultiBarter.MultiComponant
+            memory ask = ERC_NMultiBarter.MultiComponant({
+                tokenAddr: askTokenAddr,
+                tokenIds: askTokenIds
+            });
+        data = ERC_NMultiBarter.MultiBarterTerms(
+            bid,
+            ask,
+            nonce,
+            owner,
+            deadline
+        );
+
+        bytes32 bidStructHash = keccak256(
+            abi.encode(
+                MULTI_COMPONANT_TYPEHASH,
+                bidTokenAddr,
+                keccak256(abi.encodePacked(bidTokenIds))
+            )
+        );
+        bytes32 askStructHash = keccak256(
+            abi.encode(
+                MULTI_COMPONANT_TYPEHASH,
+                askTokenAddr,
+                keccak256(abi.encodePacked(askTokenIds))
+            )
+        );
+        structHash = keccak256(
+            abi.encode(
+                MULTI_BARTER_TERMS_TYPEHASH,
                 bidStructHash,
                 askStructHash,
                 nonce,

@@ -52,8 +52,8 @@ contract ERC_NMultiBarter is ERC_N {
         );
 
         for (uint256 i; i < data.ask.tokenIds.length; ) {
-            if (!_isApprovedOrOwner(data.owner, data.ask.tokenIds[i]))
-                revert NotOwnerNorApproved(data.owner, data.ask.tokenIds[i]);
+            if (!_isApprovedOrOwner(msg.sender, data.ask.tokenIds[i]))
+                revert NotOwnerNorApproved(msg.sender, data.ask.tokenIds[i]);
             _transfer(msg.sender, data.owner, data.ask.tokenIds[i]);
 
             unchecked {
@@ -101,21 +101,21 @@ contract ERC_NMultiBarter is ERC_N {
             abi.encode(
                 MULTI_COMPONANT_TYPEHASH,
                 data.bid.tokenAddr,
-                data.bid.tokenIds // encode array?
+                keccak256(abi.encodePacked(data.bid.tokenIds))
             )
         );
         bytes32 askStructHash = keccak256(
             abi.encode(
                 MULTI_COMPONANT_TYPEHASH,
                 data.ask.tokenAddr,
-                data.ask.tokenIds // encode array?
+                keccak256(abi.encodePacked(data.ask.tokenIds))
             )
         );
 
         return
             keccak256(
                 abi.encode(
-                    BARTER_TERMS_TYPEHASH,
+                    MULTI_BARTER_TERMS_TYPEHASH,
                     bidStructHash,
                     askStructHash,
                     data.nonce,

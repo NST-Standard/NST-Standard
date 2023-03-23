@@ -59,7 +59,7 @@ contract ERCN_test is Test, Utils {
     }
 
     /*////////////////////////////////////////////////////////////////////////////////////////////////
-                                              TEST CASES
+                                            TEST CASES One-to-one
     ////////////////////////////////////////////////////////////////////////////////////////////////*/
 
     function test_barter_OneToOneBarter() public {
@@ -218,6 +218,47 @@ contract ERCN_test is Test, Utils {
     }
 
     /*////////////////////////////////////////////////////////////////////////////////////////////////
+                                              TEST CASES -Multi
+    ////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+    function test_barterMulti_BarterCorrectly() public {
+        ticket.mint(USER3, 5);
+        ticket.mint(USER3, 10);
+        ticket.mint(USER3, 15);
+        ticket.mint(USER3, 20);
+        discount.mint(USER4, 1);
+        discount.mint(USER4, 2);
+        discount.mint(USER4, 3);
+        discount.mint(USER4, 4);
+
+        (
+            PermissionlessERC_NMultiBarter.MultiBarterTerms memory data,
+            bytes memory signature
+        ) = workaround_User3Ask();
+
+        assertEq(ticket.ownerOf(5), USER3);
+        assertEq(ticket.ownerOf(10), USER3);
+        assertEq(ticket.ownerOf(15), USER3);
+        assertEq(ticket.ownerOf(20), USER3);
+        assertEq(discount.ownerOf(1), USER4);
+        assertEq(discount.ownerOf(2), USER4);
+        assertEq(discount.ownerOf(3), USER4);
+        assertEq(discount.ownerOf(4), USER4);
+
+        vm.prank(USER4);
+        discount.barter(data, signature);
+
+        assertEq(ticket.ownerOf(5), USER4);
+        assertEq(ticket.ownerOf(10), USER3);
+        assertEq(ticket.ownerOf(15), USER4);
+        assertEq(ticket.ownerOf(20), USER4);
+        assertEq(discount.ownerOf(1), USER3);
+        assertEq(discount.ownerOf(2), USER3);
+        assertEq(discount.ownerOf(3), USER3);
+        assertEq(discount.ownerOf(4), USER3);
+    }
+
+    /*////////////////////////////////////////////////////////////////////////////////////////////////
                                               WORKAROUND
     ////////////////////////////////////////////////////////////////////////////////////////////////*/
     function workaround_User1Ask(
@@ -250,5 +291,44 @@ contract ERCN_test is Test, Utils {
         return (data, signature);
     }
 
-    // function workaround_SignTypedData()
+    function workaround_User3Ask()
+        internal
+        view
+        returns (
+            PermissionlessERC_NMultiBarter.MultiBarterTerms memory data,
+            bytes memory
+        )
+    {
+        uint256[] memory bidIds = new uint256[](3);
+        uint256[] memory askIds = new uint256[](4);
+        bidIds[0] = 5;
+        bidIds[1] = 15;
+        bidIds[2] = 20;
+        askIds[0] = 1;
+        askIds[1] = 2;
+        askIds[2] = 3;
+        askIds[3] = 4;
+        bytes32 structHash;
+        (data, structHash) = workaround_CreateMultiBarterTerms({
+            bidTokenAddr: TICKET,
+            bidTokenIds: bidIds,
+            askTokenAddr: DISCOUNT,
+            askTokenIds: askIds,
+            nonce: ticket.nonce(USER3),
+            owner: USER3,
+            deadline: type(uint48).max
+        });
+
+        bytes32 typedDataHash = workaround_EIP712TypedData(
+            structHash,
+            ticket.name(),
+            "1",
+            TICKET
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(USER3_PK, typedDataHash);
+        bytes memory signature = bytes.concat(r, s, bytes1(v));
+
+        return (data, signature);
+    }
 }
