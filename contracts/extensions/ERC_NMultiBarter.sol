@@ -18,6 +18,9 @@ contract ERC_NMultiBarter is ERC_N {
         uint48 deadline;
     }
 
+    /// @dev restrict barter with an empty {MultiComponant.tokenIds} array
+    error EmptyMultiComponant();
+
     bytes32 public immutable MULTI_BARTER_TERMS_TYPEHASH;
     bytes32 public immutable MULTI_COMPONANT_TYPEHASH;
 
@@ -50,6 +53,7 @@ contract ERC_NMultiBarter is ERC_N {
             msg.sender,
             signature
         );
+        if (data.ask.tokenIds.length == 0) revert EmptyMultiComponant();
 
         for (uint256 i; i < data.ask.tokenIds.length; ) {
             if (!_isApprovedOrOwner(msg.sender, data.ask.tokenIds[i]))
@@ -67,6 +71,7 @@ contract ERC_NMultiBarter is ERC_N {
         address to,
         bytes memory signature
     ) external onlyExchangeable(msg.sender) {
+        if (data.bid.tokenIds.length == 0) revert EmptyMultiComponant();
         // reconstruct the hash of signed message and use nonce
         bytes32 structHash = _checkAndDisgestData(data);
 

@@ -258,6 +258,26 @@ contract ERCN_test is Test, Utils {
         assertEq(discount.ownerOf(4), USER3);
     }
 
+    function test_barterMulti_CannotBarterEmptyArray() public {
+        ticket.mint(USER3, 5);
+        ticket.mint(USER3, 10);
+        ticket.mint(USER3, 15);
+        ticket.mint(USER3, 20);
+        discount.mint(USER4, 1);
+        discount.mint(USER4, 2);
+        discount.mint(USER4, 3);
+        discount.mint(USER4, 4);
+
+        (
+            PermissionlessERC_NMultiBarter.MultiBarterTerms memory data,
+            bytes memory signature
+        ) = workaround_User4TryWithEmptyBid();
+
+        vm.prank(USER3);
+        vm.expectRevert(abi.encodeWithSignature("EmptyMultiComponant()"));
+        ticket.barter(data, signature);
+    }
+
     /*////////////////////////////////////////////////////////////////////////////////////////////////
                                               WORKAROUND
     ////////////////////////////////////////////////////////////////////////////////////////////////*/
@@ -327,6 +347,43 @@ contract ERCN_test is Test, Utils {
         );
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(USER3_PK, typedDataHash);
+        bytes memory signature = bytes.concat(r, s, bytes1(v));
+
+        return (data, signature);
+    }
+
+    function workaround_User4TryWithEmptyBid()
+        internal
+        view
+        returns (
+            PermissionlessERC_NMultiBarter.MultiBarterTerms memory data,
+            bytes memory
+        )
+    {
+        uint256[] memory bidIds = new uint256[](0);
+        uint256[] memory askIds = new uint256[](3);
+        askIds[0] = 5;
+        askIds[1] = 15;
+        askIds[2] = 20;
+        bytes32 structHash;
+        (data, structHash) = workaround_CreateMultiBarterTerms({
+            bidTokenAddr: DISCOUNT,
+            bidTokenIds: bidIds,
+            askTokenAddr: TICKET,
+            askTokenIds: askIds,
+            nonce: discount.nonce(USER4),
+            owner: USER4,
+            deadline: type(uint48).max
+        });
+
+        bytes32 typedDataHash = workaround_EIP712TypedData(
+            structHash,
+            discount.name(),
+            "1",
+            DISCOUNT
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(USER4_PK, typedDataHash);
         bytes memory signature = bytes.concat(r, s, bytes1(v));
 
         return (data, signature);
