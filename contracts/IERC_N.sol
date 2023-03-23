@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 
 interface IERC_N {
     /**
-     * @dev Emitted when a `tokenAddr` is settle as barterable (`barterable` == true)
+     * @dev Emitted when a `tokenAddr` is settled as barterable (`barterable` == true)
      * or stopped from being barterable (`barterable` == false)
      */
     event BarterNetworkUpdated(
@@ -32,7 +32,7 @@ interface IERC_N {
     function COMPONANT_TYPEHASH() external view returns (bytes32);
 
     /**
-     * @dev Returns the current nonce for `account`. This value must
+     * @dev return the current nonce for `account`. This value must
      * be included whenever a signature is generated for {barter}.
      *
      * Every successful call to {transferFor} increases `account`'s nonce
@@ -44,8 +44,8 @@ interface IERC_N {
     function nonce(address account) external view returns (uint256);
 
     /**
-     * @param tokenAddr contract address to verify
-     * @return true is `tokenAddr` is set as barterable
+     * @param tokenAddr as contract address to verify
+     * @return true if `tokenAddr` is set as barterable
      */
     function isBarterable(address tokenAddr) external view returns (bool);
 
@@ -59,11 +59,11 @@ interface IERC_N {
      *  - `signature` must be a valid `secp256k1` signature from `data.owner`
      *  over the EIP712-formatted function arguments.
      *  - the signature must use `data.owner`'s current nonce (see {nonces}).
-     *  - `data.owner` must own of be approved for `data.bid.tokenId`
+     *  - `data.owner` must own or be approved for `data.bid.tokenId`
      *
-     * @param data struct of the barter terms
+     * @param data struct as the barter terms
      * @param to recipient address
-     * @param signature signature of the hashed struct following EIP712
+     * @param signature as signature of the hashed struct following EIP712
      */
     function transferFor(
         BarterTerms memory data,
@@ -78,10 +78,10 @@ interface IERC_N {
      * Requirements:
      *
      *  - `data` and `signature` must follow requirements of {transferFor}
-     *  - the caller must own of be approved for `data.ask.tokenId`
+     *  - the caller must own or be approved for `data.ask.tokenId`
      *
      * @param data struct of the barter terms
-     * @param signature signature of the hashed struct following EIP712
+     * @param signature as signature of the hashed struct following EIP712
      */
     function barter(BarterTerms memory data, bytes memory signature) external;
 }
