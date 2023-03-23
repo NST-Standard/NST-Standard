@@ -17,7 +17,7 @@ _These contract are used in `test`_
 
 ## Tests
 
-Tests are writen using [Foundry](https://book.getfoundry.sh/getting-started/installation), here the list of tests:
+Tests are writen using [Foundry](https://book.getfoundry.sh/getting-started/installation), here is the list of tests:
 
 - Barter on same contract
 - Cannot use an expired signature
@@ -28,7 +28,7 @@ Tests are writen using [Foundry](https://book.getfoundry.sh/getting-started/inst
 
 ## Building instruction
 
-You can build a Foundry repo by running following scripts:
+You can build a Foundry repo by running the following scripts:
 
 ```
 forge init --force
