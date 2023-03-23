@@ -17,17 +17,17 @@ contract ERC_N is ERC721, EIP712, IERC_N {
     error InvalidSignatureOwner(address expectedOwner);
     error NotOwnerNorApproved(address attempter, uint256 tokenId);
 
-    /// @dev Hash of the message/struct to sign and send
+    /// @dev set typehashes immuatable
     bytes32 public immutable override BARTER_TERMS_TYPEHASH;
     bytes32 public immutable override COMPONANT_TYPEHASH;
 
-    /// @dev Users nonces to protect against replay attack
+    /// @dev users nonces to protect against replay attack
     mapping(address => uint256) private _nonces;
 
-    /// @dev keep track of allowed token which can be traded with this one
+    /// @dev keep track of address allowed for barter
     mapping(address => bool) private _barterables;
 
-    /// @dev allow only whitelisted token to call a function
+    /// @dev check if a token address is set as barterable
     modifier onlyExchangeable(address tokenAddr) {
         if (!_barterables[tokenAddr]) revert BarterNotEnabled(tokenAddr);
         _;
@@ -50,9 +50,8 @@ contract ERC_N is ERC721, EIP712, IERC_N {
     /*////////////////////////////////////////////////////////////////////////////////////////////////
                                               PUBLIC FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////////////////////////*/
-    /**
-     * @notice See {IERC_N}
-     */
+
+    /// @dev See {IERC_N-barter}
     function barter(
         BarterTerms memory data,
         bytes memory signature
@@ -65,9 +64,7 @@ contract ERC_N is ERC721, EIP712, IERC_N {
         _transfer(msg.sender, data.owner, data.ask.tokenId);
     }
 
-    /**
-     * @notice see {IERC_N}
-     */
+    /// @dev See {IERC_N-transferFor}
     function transferFor(
         BarterTerms memory data,
         address to,
@@ -91,10 +88,12 @@ contract ERC_N is ERC721, EIP712, IERC_N {
                                                 GETTERS
     ////////////////////////////////////////////////////////////////////////////////////////////////*/
 
+    /// @dev See {IERC_N-nonce}
     function nonce(address account) external view returns (uint256) {
         return _nonces[account];
     }
 
+    /// @dev See {IERC_N-isBarterable}
     function isBarterable(address tokenAddr) external view returns (bool) {
         return _barterables[tokenAddr];
     }
@@ -123,6 +122,16 @@ contract ERC_N is ERC721, EIP712, IERC_N {
     /*////////////////////////////////////////////////////////////////////////////////////////////////
                                           INTERNAL FUNCTIONS
     ////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+    /**
+     * Encode `structHash` (see {EIP712-_hashTypedDataV4}), recover the signer address (see {ECDSA-recover})
+     * and validate signer address with `messageOwner`
+     *
+     * @param structHash digest of the signed message of barter terms
+     * @param messageOwner owner of the message, who supposed to sign the message
+     * @param signature 65-bytes signatures
+     * @return signer address, if valid, who sign the message
+     */
     function _checkMessageSignature(
         bytes32 structHash,
         address messageOwner,
@@ -137,9 +146,10 @@ contract ERC_N is ERC721, EIP712, IERC_N {
     }
 
     /**
-     * @dev Internal function to implement for allowing transfer with
-     * others NST.
+     * @dev set `tokenAddr` as barterable
+     *
      * Emit {BarterNetworkUpdated}
+     *
      * @param tokenAddr token address to approve
      */
     function _enableBarterWith(address tokenAddr) internal {
@@ -148,17 +158,26 @@ contract ERC_N is ERC721, EIP712, IERC_N {
     }
 
     /**
-     * @dev Internal function to implement for banning transfer with
-     * others NST.
-     * Emit {BarterNetworkUpdated}
-     * @param tokenAddr token address to ban
+     * @dev set `tokenAddr` as non-barterable
      *
+     * Emit {BarterNetworkUpdated}
+     *
+     * @param tokenAddr token address to ban
      */
     function _stopBarterWith(address tokenAddr) internal {
         _barterables[tokenAddr] = false;
         emit BarterNetworkUpdated(tokenAddr, false);
     }
 
+    /**
+     * @dev take up signed message information and validate it,
+     * check the user's nonce and increment it and check the message
+     * expiracy
+     *
+     * @param _nonce message's nonce
+     * @param _owner message's owner
+     * @param _deadline message's expiracy deadline
+     * */
     function _commitMessageData(
         uint256 _nonce,
         address _owner,
@@ -172,6 +191,10 @@ contract ERC_N is ERC721, EIP712, IERC_N {
         if (block.timestamp > _deadline) revert SignatureExpired();
     }
 
+    /**
+     * @dev take the barter argument, call {_commitMessageData} to check
+     * its validity and encode the barter argument as specified in {EIP712}
+     */
     function _checkAndDisgestData(
         BarterTerms memory data
     ) private returns (bytes32) {

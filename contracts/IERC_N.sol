@@ -4,29 +4,19 @@ pragma solidity ^0.8.13;
 
 interface IERC_N {
     /**
-     * @dev This emits when a token address barterable properties change
-     * This emits when a new contract address is set as barterable (`barterable` == true)
-     * and revoked (`barterable` == false)
+     * @dev Emitted when a `tokenAddr` is settle as barterable (`barterable` == true)
+     * or stopped from being barterable (`barterable` == false)
      */
     event BarterNetworkUpdated(
         address indexed tokenAddr,
         bool indexed barterable
     );
 
-    /**
-     * @dev Represent one side the barter, here the minimal struct
-     * information for a one-to-one ERC721 barter.
-     */
     struct Componant {
         address tokenAddr;
         uint256 tokenId;
     }
 
-    /**
-     * @dev Aggregates informations about the barter, namely both side of the
-     * barter represented by the {Componant} struct, and informations about the
-     * signer.
-     */
     struct BarterTerms {
         Componant bid;
         Componant ask;
@@ -42,13 +32,13 @@ interface IERC_N {
     function COMPONANT_TYPEHASH() external view returns (bytes32);
 
     /**
-     * @notice Counter of successful signed barter
-     * @dev This value must be included whenever a signature
-     * is generated for {transferFor}. Every successful call
-     * to {transferFor} increases `account`'s nonce by one.
-     * This prevents a signature from being used multiple times
+     * @dev Returns the current nonce for `account`. This value must
+     * be included whenever a signature is generated for {barter}.
      *
-     * @param account address to query the actual nonce
+     * Every successful call to {transferFor} increases `account`'s nonce
+     * by one, this prevents a signature from being used multiple times.
+     *
+     * @param account address to query the current nonce
      * @return nonce of the `account`
      */
     function nonce(address account) external view returns (uint256);
@@ -60,14 +50,16 @@ interface IERC_N {
     function isBarterable(address tokenAddr) external view returns (bool);
 
     /**
-     * @notice Perform the bid transfer of the barter componant, MUST be
-     * only called by the contract address included in the ask part of the
-     * barter terms and this address MUST be allowed as a barterable contract
-     * address
-     * @dev call the internal method {_transfer} only if the result of the
-     * `ecrecover` return the owner of the message or if approved by the token
-     * owner. This function should increase the message owner nonce to prevents
-     * a signature from being used multiple times
+     * @dev transfer `data.bid.tokenId` to `to`, this function must be
+     * called by `data.ask.tokenAddr`
+     *
+     * Requirements:
+     *
+     *  - `data.deadline` must be a timestamp in the future
+     *  - `signature` must be a valid `secp256k1` signature from `data.owner`
+     *  over the EIP712-formatted function arguments.
+     *  - the signature must use `data.owner`'s current nonce (see {nonces}).
+     *  - `data.owner` must own of be approved for `data.bid.tokenId`
      *
      * @param data struct of the barter terms
      * @param to recipient address
@@ -80,11 +72,13 @@ interface IERC_N {
     ) external;
 
     /**
-     * @notice Call {transferFor} on the bid contract address (can be self) and
-     * perform the ask transfer of the barter componant. the bid contract address
-     * MUST be allowed as a barterable contract
-     * @dev Call {transferFor} with the `msg.sender` or the token owner (case of
-     * authorized operator).
+     * @dev transfer `data.ask.tokenId` to the owner of `data.bid.tokenId`, this
+     * function must call {transferFor} over `data.bid.tokenAddr`.
+     *
+     * Requirements:
+     *
+     *  - `data` and `signature` must follow requirements of {transferFor}
+     *  - the caller must own of be approved for `data.ask.tokenId`
      *
      * @param data struct of the barter terms
      * @param signature signature of the hashed struct following EIP712
