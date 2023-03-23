@@ -127,10 +127,10 @@ contract ERC_N is ERC721, EIP712, IERC_N {
      * Encode `structHash` (see {EIP712-_hashTypedDataV4}), recover the signer address (see {ECDSA-recover})
      * and validate signer address with `messageOwner`
      *
-     * @param structHash digest of the signed message of barter terms
-     * @param messageOwner owner of the message, who supposed to sign the message
-     * @param signature 65-bytes signatures
-     * @return signer address, if valid, who sign the message
+     * @param structHash as digest of the signed message of barter terms
+     * @param messageOwner as owner of the message, who is supposed to sign the message
+     * @param signature as 65-bytes signatures
+     * @return signer address, if valid, who signs the message
      */
     function _checkMessageSignature(
         bytes32 structHash,
@@ -150,7 +150,7 @@ contract ERC_N is ERC721, EIP712, IERC_N {
      *
      * Emit {BarterNetworkUpdated}
      *
-     * @param tokenAddr token address to approve
+     * @param tokenAddr as token address to approve
      */
     function _enableBarterWith(address tokenAddr) internal {
         _barterables[tokenAddr] = true;
@@ -162,7 +162,7 @@ contract ERC_N is ERC721, EIP712, IERC_N {
      *
      * Emit {BarterNetworkUpdated}
      *
-     * @param tokenAddr token address to ban
+     * @param tokenAddr as token address to ban
      */
     function _stopBarterWith(address tokenAddr) internal {
         _barterables[tokenAddr] = false;
@@ -174,9 +174,9 @@ contract ERC_N is ERC721, EIP712, IERC_N {
      * check the user's nonce and increment it and check the message
      * expiracy
      *
-     * @param _nonce message's nonce
-     * @param _owner message's owner
-     * @param _deadline message's expiracy deadline
+     * @param _nonce as message's nonce
+     * @param _owner as message's owner
+     * @param _deadline as message's expiracy deadline
      * */
     function _commitMessageData(
         uint256 _nonce,
