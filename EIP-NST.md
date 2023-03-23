@@ -19,23 +19,16 @@ This EIP is an extension of [EIP-712](https://github.com/ethereum/EIPs/blob/mast
 
 Interest for soulbound tokens (SBT) in the Ethereum community still growing since the V. Buterin [idea publication](https://vitalik.ca/general/2022/01/26/soulbound.html), highlighting the non-transferrability (non-)features to prevent, _in fine_, speculation of the token. While a lot of propositions emerged for implementation of SBT, the non-transferability is often too restrictive and requires a certain level of centralization, especially when users want to transfer a SBT between two owned accounts. Thus SBTs are way more fitted for account-bounded properties such as reputation, voting rights, privileges, ...
 
-In case of transferable items which cannot be sellable (such as game items, gifts, discounts, ...), SBTs can fit but they require strong level of centralization as transfer are restricted by the token creator (or the community in case of DAO managed SBT).
+In case of transferable items which cannot be sellable, SBTs can fit but they require strong level of centralization as transfer are restricted by the token creator (or the community in case of DAO managed SBT). Here some examples of possibles NSTs:
 
-NSTs propose a way to enforce users to perform barter of tokens between two authorized tokens in order to maintain a value equivalence in the exchange and so reduce the risk of speculation associated with an one way transfer. NSTs would provide a solution for transferring non-valuable tokens between projects based on their true value instead of their perceived/ speculated value without leveraging a third party.
-
-Examples of possible use cases :
-
-- Video games assets that could be exchangable but non sellable, to avoid any speculation around the assets, while keeping the NFTs existing benefits.
+- Video games assets that could be exchangable but non sellable, to avoid any speculation around the assets, while keeping the NFTs existing benefits
+- Event tickets: Ticket hijacking is a common problem for many popular events and can force fans to pay inflated prices for tickets. By using a non-sellable token standard, event organisers could create tickets that cannot be resold, ensuring that fans can only buy tickets at face value
 - Kids NSTs, in all applications dedicated to minor individuals, to avoid them to make or transact money
 - Proof of authenticity for luxury items, but avoiding any economic interest to keep the NFT to resell it separately from the physical object
 - Loyalty points: Many businesses offer loyalty programmes to their customers to encourage them to return. These programmes typically award points or other rewards for purchases made at the business. Using a standard non-sellable token, businesses could issue tokens that can only be used for shop credit or other non-cash rewards, ensuring that customers cannot redeem them for cash.
 - Company Benefits: A company could be giving out benefits to its employees in a closed environment its controls ( hence being able to freely add in or remove exchangeables benefits).
-- Access to exclusive content: Musicians, artists and other creators often offer exclusive content to their fans in exchange for support. Using a standard non-sellable token, creators can create tokens that give access to this exclusive content, but which cannot be sold or traded. This would help to ensure that content remains exclusive and that creators are properly compensated for their work.
-- Environmental credits: Governments and companies often issue environmental credits to encourage people to adopt sustainable practices. Using a standard non-sellable token, these credits could be issued as tokens that can only be used for specific purposes, such as funding environmental projects or purchasing sustainable products.
-- Event tickets: Ticket hijacking is a common problem for many popular events and can force fans to pay inflated prices for tickets. By using a non-sellable token standard, event organisers could create tickets that cannot be resold, ensuring that fans can only buy tickets at face value.
-- Proxy: Use of a non-saleable token to give a proxy at a shareholders' meeting.
 
-Those are just some of the examples that NSTs could be used in.
+NSTs propose a way to enforce users to perform barter of tokens between two authorized tokens in order to maintain a value equivalence in the exchange and so reduce the risk of speculation associated with an one way transfer. NSTs would provide a solution for transferring non-valuable tokens between projects based on their true value instead of their perceived/ speculated value without leveraging a third party.
 
 ## Specification
 
