@@ -127,9 +127,9 @@ contract ERC_N is ERC721, EIP712, IERC_N {
      * Encode `structHash` (see {EIP712-_hashTypedDataV4}), recover the signer address (see {ECDSA-recover})
      * and validate signer address with `messageOwner`
      *
-     * @param structHash as digest of the signed message of barter terms
-     * @param messageOwner as owner of the message, who is supposed to sign the message
-     * @param signature as 65-bytes signatures
+     * @param structHash digest of the signed message of barter terms
+     * @param messageOwner owner of the message, who is supposed to sign the message
+     * @param signature 65-bytes signatures
      * @return signer address, if valid, who signs the message
      */
     function _checkMessageSignature(
@@ -174,9 +174,9 @@ contract ERC_N is ERC721, EIP712, IERC_N {
      * check the user's nonce and increment it and check the message
      * expiracy
      *
-     * @param _nonce as message's nonce
-     * @param _owner as message's owner
-     * @param _deadline as message's expiracy deadline
+     * @param _nonce message's nonce
+     * @param _owner message's owner
+     * @param _deadline message's expiracy deadline
      * */
     function _commitMessageData(
         uint256 _nonce,

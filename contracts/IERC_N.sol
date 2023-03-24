@@ -44,7 +44,7 @@ interface IERC_N {
     function nonce(address account) external view returns (uint256);
 
     /**
-     * @param tokenAddr as contract address to verify
+     * @param tokenAddr contract address to verify
      * @return true if `tokenAddr` is set as barterable
      */
     function isBarterable(address tokenAddr) external view returns (bool);
@@ -61,7 +61,7 @@ interface IERC_N {
      *  - the signature must use `data.owner`'s current nonce (see {nonces}).
      *  - `data.owner` must own or be approved for `data.bid.tokenId`
      *
-     * @param data struct as the barter terms
+     * @param data struct the barter terms
      * @param to recipient address
      * @param signature as signature of the hashed struct following EIP712
      */
