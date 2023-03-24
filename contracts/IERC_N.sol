@@ -61,7 +61,7 @@ interface IERC_N {
      *  - the signature must use `data.owner`'s current nonce (see {nonces}).
      *  - `data.owner` must own or be approved for `data.bid.tokenId`
      *
-     * @param data struct the barter terms
+     * @param data struct as the barter terms
      * @param to recipient address
      * @param signature as signature of the hashed struct following EIP712
      */
