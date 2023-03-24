@@ -128,9 +128,9 @@ contract ERC_N is ERC721, EIP712, IERC_N {
      * and validate signer address with `messageOwner`
      *
      * @param structHash digest of the signed message of barter terms
-     * @param messageOwner owner of the message, who supposed to sign the message
+     * @param messageOwner owner of the message, who is supposed to sign the message
      * @param signature 65-bytes signatures
-     * @return signer address, if valid, who sign the message
+     * @return signer address, if valid, who signs the message
      */
     function _checkMessageSignature(
         bytes32 structHash,
