@@ -29,9 +29,9 @@ contract ERCN_test is Test, Utils {
 
     function setUp() public {
         // deploy tokens
-        ticket = new PermissionlessERC_NMultiBarter("Ticket", "00");
+        ticket = new PermissionlessERC_NMultiBarter("Ticket", "00", "");
         TICKET = address(ticket);
-        discount = new PermissionlessERC_NMultiBarter("Discount", "01");
+        discount = new PermissionlessERC_NMultiBarter("Discount", "01", "");
         DISCOUNT = address(discount);
 
         // enable barters
