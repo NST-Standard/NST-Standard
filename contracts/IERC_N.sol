@@ -63,7 +63,7 @@ interface IERC_N {
      *
      * @param data struct the barter terms
      * @param to recipient address
-     * @param signature signature of the hashed struct following EIP712
+     * @param signature as signature of the hashed struct following EIP712
      */
     function transferFor(
         BarterTerms memory data,
@@ -81,7 +81,7 @@ interface IERC_N {
      *  - the caller must own or be approved for `data.ask.tokenId`
      *
      * @param data struct of the barter terms
-     * @param signature signature of the hashed struct following EIP712
+     * @param signature as signature of the hashed struct following EIP712
      */
     function barter(BarterTerms memory data, bytes memory signature) external;
 }

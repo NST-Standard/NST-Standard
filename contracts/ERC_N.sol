@@ -150,7 +150,7 @@ contract ERC_N is ERC721, EIP712, IERC_N {
      *
      * Emit {BarterNetworkUpdated}
      *
-     * @param tokenAddr token address to approve
+     * @param tokenAddr as token address to approve
      */
     function _enableBarterWith(address tokenAddr) internal {
         _barterables[tokenAddr] = true;
@@ -162,7 +162,7 @@ contract ERC_N is ERC721, EIP712, IERC_N {
      *
      * Emit {BarterNetworkUpdated}
      *
-     * @param tokenAddr token address to ban
+     * @param tokenAddr as token address to ban
      */
     function _stopBarterWith(address tokenAddr) internal {
         _barterables[tokenAddr] = false;
