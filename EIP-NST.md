@@ -21,12 +21,12 @@ Interest for soulbound tokens (SBT) in the Ethereum community still growing sinc
 
 In case of transferable items which cannot be sellable, SBTs can fit but they require strong level of centralization as transfer are restricted by the token creator (or the community in case of DAO managed SBT). Here some examples of possibles NSTs:
 
-- Video games assets that could be exchangable but non sellable, to avoid any speculation around the assets, while keeping the NFTs existing benefits
-- Event tickets: Ticket hijacking is a common problem for many popular events and can force fans to pay inflated prices for tickets. By using a non-sellable token standard, event organisers could create tickets that cannot be resold, ensuring that fans can only buy tickets at face value
+- Video games assets that could be exchangeable but non sellable, to avoid any speculation around the assets, while keeping the NFTs existing benefits
+- Event tickets: Ticket hijacking is a common problem for many popular events and can force fans to pay inflated prices for tickets. By using a non-sellable token standard, event organizers could create tickets that cannot be resold, ensuring that fans can only buy tickets at face value
 - Kids NSTs, in all applications dedicated to minor individuals, to avoid them to make or transact money
 - Proof of authenticity for luxury items, but avoiding any economic interest to keep the NFT to resell it separately from the physical object
-- Loyalty points: Many businesses offer loyalty programmes to their customers to encourage them to return. These programmes typically award points or other rewards for purchases made at the business. Using a standard non-sellable token, businesses could issue tokens that can only be used for shop credit or other non-cash rewards, ensuring that customers cannot redeem them for cash.
-- Company Benefits: A company could be giving out benefits to its employees in a closed environment its controls ( hence being able to freely add in or remove exchangeables benefits).
+- Loyalty points: Many businesses offer loyalty programmes to their customers to encourage them to return. These programmes typically award points or other rewards for purchases made at the business. Using a standard non-sellable token, businesses could issue tokens that can only be used for shop credit or other non-cash rewards, ensuring that customers cannot redeem them for cash
+- Company Benefits: A company could be giving out benefits to its employees in a closed environment its controls ( hence being able to freely add in or remove exchangeable benefits)
 
 NSTs propose a way to enforce users to perform barter of tokens between two authorized tokens in order to maintain a value equivalence in the exchange and so reduce the risk of speculation associated with an one way transfer. NSTs would provide a solution for transferring non-valuable tokens between projects based on their true value instead of their perceived/ speculated value without leveraging a third party.
 
