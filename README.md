@@ -1,52 +1,18 @@
-# Non-sellable token
+# Non-Sellable Tokens (NST)
 
-- [EIP-draft](./EIP-NST.md)
-- [Solidity implementation](./contracts/)
-- [dApp repo](https://github.com/NST-Standard/nst-dapp)
+> NST is an extension of [ERC-721](https://eips.ethereum.org/EIPS/eip-721) to create non-sellable tokens. It aims to prevent a financial sale by introducing a barter mechanism which replace one-way transfers by two-way transfers. Users are forced to barter tokens, send to receive or receive to send. Bartering possibilities between tokens are defined by tokens creators, who must therefore maintain an equivalence of value to make unattractive the sale of a token.
 
-## Try it on the dApp
+> The barter mechanism of this EIP can be interpreted as a *multi-signature* transfer where a signed message is created by a token holder to define which tokens will be bartered and then executed, if accepted, by the owner of wanted tokens on the smart contract to perform the barter.
 
-dApp: https://nst-dapp.vercel.app/
+- [**Read the full proposal (EIP-6774)**](https://github.com/ethereum/ERCs/blob/e305cc2ddbf89290539c6df92778c1970d4893eb/ERCS/erc-6774.md)
+- [Join the discussion on Ethereum Magician forum](https://ethereum-magicians.org/t/eip-6774-non-sellable-tokens/13528)
+- [Article describing the idea (LinkedIn)](https://www.linkedin.com/pulse/non-sellable-token-nst-matthieu-chassagne/?trackingId=q4py17gSQLuzJaS0If8ofQ%3D%3D)
 
-## Compile and run tests
 
-Make sure you have installed [Rust](https://www.rust-lang.org/fr/learn/get-started) & [Foundry](https://book.getfoundry.sh/getting-started/installation)
+## Implementations 
 
-```
-forge install
-forge update
-```
+*Files in this repo are not up to date, please refer to the Solidity implementations on the proposal.*
 
-**Compile contracts:**
+- [Solidity implementation](https://github.com/ethereum/ERCs/blob/e305cc2ddbf89290539c6df92778c1970d4893eb/assets/erc-6774/README.md)
+- [dApp example repo](https://github.com/NST-Standard/nst-dapp)
 
-Set compiler version in `foundry.toml`
-
-```toml
-solc = "0.8.13"
-```
-
-Compile and log contracts sizes:
-
-```
-forge build --sizes
-```
-
-**Run tests:**
-
-```
-forge test -vvvv
-```
-
-## Deploy on local blockchain
-
-Run `anvil` (ganache-like local blockchain):
-
-```
-anvil --block-time 5
-```
-
-Deploy contract on `anvil`:
-
-```
-forge script deploy --rpc-url anvil --broadcast
-```
